@@ -185,7 +185,7 @@ CI_MAP = {
 def ci_icon(env_name: str, item_ci: dict) -> str:
     info = item_ci.get(env_name) if item_ci else None
     if not info:
-        return '<span class="ci-icon ci-unknown" title="CI: not configured">–</span>'
+        return ""
     status = info.get("status", "unknown")
     url    = info.get("pipeline_url", "")
     cls, sym, title = CI_MAP.get(status, ("ci-unknown", "?", f"CI: {status}"))
@@ -353,7 +353,7 @@ tbody tr:hover td { background: #f0f9ff !important; }
 /* sticky label cells — outer frame only, no divider between them */
 td.lp, td.lt {
   position: sticky; z-index: 10;
-  background: inherit; padding: 8px 10px; vertical-align: top;
+  background: #f4f6f8; padding: 8px 10px; vertical-align: top;
 }
 td.lp {
   left: 0; min-width: var(--col-p); max-width: var(--col-p); width: var(--col-p);
@@ -381,8 +381,8 @@ tr.pr td.lp { border-left: 3px solid #3b82f6; }
 
 /* template row */
 tr.tr { background: #f8fafc; }
-tr.tr td.lt { padding-left: 16px; color: #475569; font-size: 12px; }
-.tname { display: block; color: #475569; }
+tr.tr td.lt { padding-left: 16px; color: #475569; font-size: 11px; }
+.tname { display: block; color: #475569; font-size: 11px; }
 
 /* update row — last row of the table */
 tr.ur { background: #f8fafc; border-top: 2px solid var(--border); }
@@ -393,7 +393,7 @@ td.ur-label { padding: 6px 10px; font-size: 11px; color: var(--muted); font-styl
 td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--border); white-space: nowrap; width: 1px; }
 
 .cell-v { margin-bottom: 2px; }
-.version-link  { font-weight: 600; color: #2563eb; text-decoration: none; font-size: 13px; }
+.version-link  { font-weight: 700; color: #2563eb; text-decoration: none; font-size: 15px; }
 .version-link:hover { text-decoration: underline; }
 .version-text  { font-weight: 500; color: #334155; }
 .version-empty { color: #cbd5e1; user-select: none; }
@@ -596,7 +596,7 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
         f'<span class="leg"><span class="ci-icon ci-success">✓</span> CI pass</span>'
         f'<span class="leg"><span class="ci-icon ci-failed">✗</span> CI fail</span>'
         f'<span class="leg"><span class="ci-icon ci-running">●</span> running</span>'
-        f'<span class="leg"><span class="ci-icon ci-unknown">–</span> not configured</span>'
+        f''
         f'<span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span>'
         f'</div>'
         f'<span class="bar-tag">EDP</span>'
