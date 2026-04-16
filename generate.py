@@ -310,21 +310,23 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
 /* ── env-header row ── */
 .eh th {
   position: sticky; top: calc(var(--bar-h) + 26px); z-index: 89;
-  padding: 6px 10px; text-align: center;
+  padding: 6px 8px; text-align: center;
   font-size: 11px; font-weight: 600; color: #e2e8f0;
   border-right: 1px solid rgba(255,255,255,.07);
-  min-width: 160px;
+  width: 1px;           /* shrink to content; table-layout:auto does the rest */
+  white-space: nowrap;
 }
-.eh .lbl { background: #1e293b; text-align: left !important; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.eh .lbl { background: #1e293b; text-align: left !important; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .eh .e-it { background: #1e3a8a; border-top: 2px solid #60a5fa; }
 .eh .e-ve { background: #312e81; border-top: 2px solid #818cf8; }
 .eh .e-ad { background: #155e75; border-top: 2px solid #22d3ee; }
 .eh .e-pr { background: #78350f; border-top: 2px solid #fbbf24; }
-.env-url  { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,.4); margin-top: 1px; }
+.env-name { display: block; }
+.env-url  { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,.4); margin-top: 2px; white-space: nowrap; }
 
 /* sticky first two cols in header */
-.gh .sl1, .eh .sl1 { position: sticky !important; left: 0; z-index: 95 !important; background: #1e293b !important; }
-.gh .sl2, .eh .sl2 { position: sticky !important; left: var(--col-p); z-index: 95 !important; background: #1e293b !important; }
+.gh .sl1, .eh .sl1 { position: sticky !important; left: 0; z-index: 95 !important; background: #1e293b !important; border-right: 2px solid #000 !important; }
+.gh .sl2, .eh .sl2 { position: sticky !important; left: var(--col-p); z-index: 95 !important; background: #1e293b !important; border-right: 2px solid #000 !important; }
 
 /* ── tbody rows ── */
 tbody tr { border-bottom: 1px solid var(--border); }
@@ -334,10 +336,10 @@ tbody tr:hover td { background: #f0f9ff !important; }
 td.lp, td.lt {
   position: sticky; z-index: 10;
   background: inherit; padding: 8px 10px; vertical-align: top;
-  border-right: 1px solid var(--border);
+  border-right: 2px solid #000;
 }
 td.lp { left: 0; min-width: var(--col-p); max-width: var(--col-p); width: var(--col-p); }
-td.lt { left: var(--col-p); min-width: var(--col-t); max-width: var(--col-t); width: var(--col-t); }
+td.lt { left: var(--col-p); min-width: var(--col-t); max-width: var(--col-t); width: var(--col-t); border-right: 2px solid #000; }
 
 /* product row */
 tr.pr { background: #fff; }
@@ -360,7 +362,7 @@ tr.ur { background: #f8fafc; }
 tr.ur td { font-size: 11px; color: var(--muted); padding: 6px 10px; font-style: italic; }
 
 /* ── version cells ── */
-td.vc { padding: 7px 10px; vertical-align: top; border-right: 1px solid var(--border); }
+td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--border); white-space: nowrap; width: 1px; }
 
 .cell-v { margin-bottom: 2px; }
 .version-link  { font-weight: 600; color: #2563eb; text-decoration: none; font-size: 13px; }
@@ -368,7 +370,7 @@ td.vc { padding: 7px 10px; vertical-align: top; border-right: 1px solid var(--bo
 .version-text  { font-weight: 500; color: #334155; }
 .version-empty { color: #cbd5e1; user-select: none; }
 
-.cell-links { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 3px; }
+.cell-links { display: flex; flex-wrap: nowrap; gap: 3px; margin-bottom: 3px; }
 .sub-link {
   font-size: 10px; color: #64748b; text-decoration: none;
   background: #f1f5f9; border-radius: 3px; padding: 1px 5px;
@@ -592,8 +594,10 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
         g   = env.get("group", "infratest")
         cls = GROUP_CLASSES.get(g, ("g-it", "e-it"))[1]
         p.append(
-            f'<th class="{cls}">{esc(env["name"])}'
-            f'<span class="env-url">{esc(env.get("url", ""))}</span></th>'
+            f'<th class="{cls}">'
+            f'<span class="env-name">{esc(env["name"])}</span>'
+            f'<span class="env-url">{esc(env.get("url", ""))}</span>'
+            f'</th>'
         )
     p.append('</tr>')
     p.append('</thead>')
@@ -659,7 +663,7 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
             )
             p.append(f'<tr class="tr"><td class="lp"></td>{tlabel}')
             for env in envs:
-                p.append(version_cell(env["name"], tkey, versions, ci_status))
+                p.append(version_cell(env["name"], tkey, versions, ci_status, show_ci=False))
             p.append('</tr>')
 
     p.append('</tbody>')

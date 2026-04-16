@@ -60,21 +60,23 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
 /* ── env-header row ── */
 .eh th {
   position: sticky; top: calc(var(--bar-h) + 26px); z-index: 89;
-  padding: 6px 10px; text-align: center;
+  padding: 6px 8px; text-align: center;
   font-size: 11px; font-weight: 600; color: #e2e8f0;
   border-right: 1px solid rgba(255,255,255,.07);
-  min-width: 160px;
+  width: 1px;           /* shrink to content; table-layout:auto does the rest */
+  white-space: nowrap;
 }
-.eh .lbl { background: #1e293b; text-align: left !important; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.eh .lbl { background: #1e293b; text-align: left !important; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .eh .e-it { background: #1e3a8a; border-top: 2px solid #60a5fa; }
 .eh .e-ve { background: #312e81; border-top: 2px solid #818cf8; }
 .eh .e-ad { background: #155e75; border-top: 2px solid #22d3ee; }
 .eh .e-pr { background: #78350f; border-top: 2px solid #fbbf24; }
-.env-url  { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,.4); margin-top: 1px; }
+.env-name { display: block; }
+.env-url  { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,.4); margin-top: 2px; white-space: nowrap; }
 
 /* sticky first two cols in header */
-.gh .sl1, .eh .sl1 { position: sticky !important; left: 0; z-index: 95 !important; background: #1e293b !important; }
-.gh .sl2, .eh .sl2 { position: sticky !important; left: var(--col-p); z-index: 95 !important; background: #1e293b !important; }
+.gh .sl1, .eh .sl1 { position: sticky !important; left: 0; z-index: 95 !important; background: #1e293b !important; border-right: 2px solid #000 !important; }
+.gh .sl2, .eh .sl2 { position: sticky !important; left: var(--col-p); z-index: 95 !important; background: #1e293b !important; border-right: 2px solid #000 !important; }
 
 /* ── tbody rows ── */
 tbody tr { border-bottom: 1px solid var(--border); }
@@ -84,10 +86,10 @@ tbody tr:hover td { background: #f0f9ff !important; }
 td.lp, td.lt {
   position: sticky; z-index: 10;
   background: inherit; padding: 8px 10px; vertical-align: top;
-  border-right: 1px solid var(--border);
+  border-right: 2px solid #000;
 }
 td.lp { left: 0; min-width: var(--col-p); max-width: var(--col-p); width: var(--col-p); }
-td.lt { left: var(--col-p); min-width: var(--col-t); max-width: var(--col-t); width: var(--col-t); }
+td.lt { left: var(--col-p); min-width: var(--col-t); max-width: var(--col-t); width: var(--col-t); border-right: 2px solid #000; }
 
 /* product row */
 tr.pr { background: #fff; }
@@ -110,7 +112,7 @@ tr.ur { background: #f8fafc; }
 tr.ur td { font-size: 11px; color: var(--muted); padding: 6px 10px; font-style: italic; }
 
 /* ── version cells ── */
-td.vc { padding: 7px 10px; vertical-align: top; border-right: 1px solid var(--border); }
+td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--border); white-space: nowrap; width: 1px; }
 
 .cell-v { margin-bottom: 2px; }
 .version-link  { font-weight: 600; color: #2563eb; text-decoration: none; font-size: 13px; }
@@ -118,7 +120,7 @@ td.vc { padding: 7px 10px; vertical-align: top; border-right: 1px solid var(--bo
 .version-text  { font-weight: 500; color: #334155; }
 .version-empty { color: #cbd5e1; user-select: none; }
 
-.cell-links { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 3px; }
+.cell-links { display: flex; flex-wrap: nowrap; gap: 3px; margin-bottom: 3px; }
 .sub-link {
   font-size: 10px; color: #64748b; text-decoration: none;
   background: #f1f5f9; border-radius: 3px; padding: 1px 5px;
@@ -204,7 +206,7 @@ a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
 </style>
 </head>
 <body>
-<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="ci-icon ci-success">✓</span> CI pass</span><span class="leg"><span class="ci-icon ci-failed">✗</span> CI fail</span><span class="leg"><span class="ci-icon ci-running">●</span> running</span><span class="leg"><span class="ci-icon ci-unknown">–</span> not configured</span><span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span></div><span class="bar-tag">EDP</span><span class="bar-ts">Generated 2026-04-16 00:59 UTC</span></div>
+<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="ci-icon ci-success">✓</span> CI pass</span><span class="leg"><span class="ci-icon ci-failed">✗</span> CI fail</span><span class="leg"><span class="ci-icon ci-running">●</span> running</span><span class="leg"><span class="ci-icon ci-unknown">–</span> not configured</span><span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span></div><span class="bar-tag">EDP</span><span class="bar-ts">Generated 2026-04-16 01:15 UTC</span></div>
 <div class="wrap"><table>
 <thead>
 <tr class="gh">
@@ -217,13 +219,13 @@ a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
 <tr class="eh">
 <th class="lbl sl1">Product</th>
 <th class="lbl sl2">Workflow Template</th>
-<th class="e-it">InfraTestDev<span class="env-url">.dev.nzero.test</span></th>
-<th class="e-it">InfraTestTest<span class="env-url">.test.nzero.test</span></th>
-<th class="e-it">InfraTestIntegration<span class="env-url">.nzero.test</span></th>
-<th class="e-ve">VE<span class="env-url">.nzero.group</span></th>
-<th class="e-ad">AppDevTest<span class="env-url">.nzero.app</span></th>
-<th class="e-pr">ProdBelgium<span class="env-url">.nzero.be</span></th>
-<th class="e-pr">ProdGermany<span class="env-url">.nzero.de</span></th>
+<th class="e-it"><span class="env-name">InfraTestDev</span><span class="env-url">.dev.nzero.test</span></th>
+<th class="e-it"><span class="env-name">InfraTestTest</span><span class="env-url">.test.nzero.test</span></th>
+<th class="e-it"><span class="env-name">InfraTestIntegration</span><span class="env-url">.nzero.test</span></th>
+<th class="e-ve"><span class="env-name">VE</span><span class="env-url">.nzero.group</span></th>
+<th class="e-ad"><span class="env-name">AppDevTest</span><span class="env-url">.nzero.app</span></th>
+<th class="e-pr"><span class="env-name">ProdBelgium</span><span class="env-url">.nzero.be</span></th>
+<th class="e-pr"><span class="env-name">ProdGermany</span><span class="env-url">.nzero.de</span></th>
 </tr>
 </thead>
 <tbody>
@@ -246,13 +248,13 @@ a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
 <td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2107" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
 </tr>
 <tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_Rule_Panorama</span></td>
-<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2201" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2202" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2203" class="ci-icon ci-failed" title="CI: failed" target="_blank">✗</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2204" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2205" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2206" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2207" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
 </tr>
 <tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_Delete_Rule_Panorama</span></td>
 <td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
@@ -336,13 +338,13 @@ a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
 <td class="vc"><div class="cell-v"><span class="version-text">0.0.7</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
 </tr>
 <tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_L3Zone_Apstra</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3001" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3002" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3003" class="ci-icon ci-failed" title="CI: failed" target="_blank">✗</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3004" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-text">0.0.33</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3005" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-text">0.0.33</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3006" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
-<td class="vc"><div class="cell-v"><span class="version-text">0.0.33</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3007" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.33</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.33</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.33</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
 </tr>
 <tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_L3Zone_Cisco</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_cisco/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
 <td class="vc"><div class="cell-v"><span class="version-text">0.0.30</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
