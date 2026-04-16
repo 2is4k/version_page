@@ -14,6 +14,7 @@ Environment variables:
 
 import json
 import os
+import re
 import sys
 import base64
 import urllib.request
@@ -163,6 +164,57 @@ def fetch_jira_bugs(config: dict) -> dict:
     return result
 
 
+# ─── Semver drift helpers ─────────────────────────────────────────────────────
+
+def _extract_semver(v: str) -> tuple:
+    """
+    Extract the most significant dot-separated numeric triplet from a version
+    string.  Handles plain semver ('1.7.6') and composite strings ('2.2-1.60.3').
+    Returns a tuple of ints, e.g. (1, 60, 3), or () if unparseable.
+    """
+    if not v or v in ("ERROR", ""):
+        return ()
+    candidates = re.findall(r'\d+(?:\.\d+)+', v)
+    if not candidates:
+        return ()
+    # Prefer the candidate with the most parts (most informative)
+    best = max(candidates, key=lambda s: len(s.split(".")))
+    return tuple(int(p) for p in best.split("."))
+
+
+def semver_drift(current: str, previous: str) -> int:
+    """
+    Compare two version strings (right env vs left env).
+    Returns drift level when current < previous (right env is behind):
+      0 = same or unparseable
+      1 = patch-level drift   →  ↓
+      2 = minor-level drift   →  ↓↓
+      3 = major-level drift   →  ↓↓↓
+    Returns 0 (no indicator) when current >= previous.
+    """
+    cur = _extract_semver(current)
+    prv = _extract_semver(previous)
+    if not cur or not prv or cur >= prv:
+        return 0
+    # Pad to equal length with zeros
+    n = max(len(cur), len(prv))
+    cur += (0,) * (n - len(cur))
+    prv += (0,) * (n - len(prv))
+    for i, (c, p) in enumerate(zip(cur, prv)):
+        if c != p:
+            return 3 if i == 0 else (2 if i == 1 else 1)
+    return 0
+
+
+def _raw_version_str(version_data) -> str:
+    """Extract plain version string from a version JSON value."""
+    if isinstance(version_data, dict):
+        v = version_data.get("version", "")
+    else:
+        v = str(version_data) if version_data else ""
+    return "" if v == "ERROR" else v
+
+
 # ─── HTML helpers ─────────────────────────────────────────────────────────────
 
 def esc(s: Any) -> str:
@@ -210,7 +262,7 @@ def bug_badge(tickets: list, product_name: str) -> str:
 
 def version_cell(
     env_name: str, item_key: str, versions: dict,
-    ci_status: dict, show_ci: bool = True,
+    ci_status: dict, show_ci: bool = True, drift: int = 0,
 ) -> str:
     raw = versions.get(env_name, {}).get(item_key, "")
 
@@ -226,12 +278,19 @@ def version_cell(
     if version == "ERROR":
         version = ""
 
+    # Drift indicator: red down-arrows, 1–3 based on semver severity
+    drift_titles = ["", "patch version behind", "minor version behind", "major version behind"]
+    drift_html = (
+        f'<span class="drift drift-{drift}" title="{drift_titles[drift]}">{"↓" * drift}</span>'
+        if drift > 0 else ""
+    )
+
     if version:
         if url:
             ver_html = (f'<a href="{esc(url)}" class="version-link" '
-                        f'target="_blank">{esc(version)}</a>')
+                        f'target="_blank">{esc(version)}</a>{drift_html}')
         else:
-            ver_html = f'<span class="version-text">{esc(version)}</span>'
+            ver_html = f'<span class="version-text">{esc(version)}</span>{drift_html}'
     else:
         ver_html = '<span class="version-empty">—</span>'
 
@@ -262,8 +321,8 @@ CSS = """
   --border: #e2e8f0;
   --text: #0f172a;
   --muted: #64748b;
-  --col-p: 200px;
-  --col-t: 190px;
+  --col-p: 160px;
+  --col-t: 145px;
   --bar-h: 52px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -397,6 +456,13 @@ td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--bor
 .version-link:hover { text-decoration: underline; }
 .version-text  { font-weight: 500; color: #334155; }
 .version-empty { color: #cbd5e1; user-select: none; }
+
+/* drift indicators — red down-arrows, severity by count */
+.drift   { font-size: 11px; font-weight: 800; margin-left: 3px;
+           vertical-align: middle; letter-spacing: -2px; line-height: 1; }
+.drift-1 { color: #f87171; }   /* patch  — light red */
+.drift-2 { color: #dc2626; }   /* minor  — red */
+.drift-3 { color: #7f1d1d; }   /* major  — dark red */
 
 .cell-links { display: flex; flex-direction: column; gap: 2px; margin-bottom: 3px; }
 .sub-link {
@@ -671,8 +737,11 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
         )
 
         p.append(f'<tr class="pr">{label_cell}<td class="lt"></td>')
-        for env in envs:
-            p.append(version_cell(env["name"], key, versions, ci_status))
+        for i, env in enumerate(envs):
+            prev_v = _raw_version_str(versions.get(envs[i-1]["name"], {}).get(key, "")) if i > 0 else ""
+            cur_v  = _raw_version_str(versions.get(env["name"], {}).get(key, ""))
+            d      = semver_drift(cur_v, prev_v)
+            p.append(version_cell(env["name"], key, versions, ci_status, drift=d))
         p.append('</tr>')
 
         # Template rows
@@ -690,8 +759,11 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
                 + f'</td>'
             )
             p.append(f'<tr class="tr"><td class="lp"></td>{tlabel}')
-            for env in envs:
-                p.append(version_cell(env["name"], tkey, versions, ci_status, show_ci=False))
+            for i, env in enumerate(envs):
+                prev_v = _raw_version_str(versions.get(envs[i-1]["name"], {}).get(tkey, "")) if i > 0 else ""
+                cur_v  = _raw_version_str(versions.get(env["name"], {}).get(tkey, ""))
+                d      = semver_drift(cur_v, prev_v)
+                p.append(version_cell(env["name"], tkey, versions, ci_status, show_ci=False, drift=d))
             p.append('</tr>')
 
     p.append('</tbody>')
