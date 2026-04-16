@@ -148,7 +148,7 @@ td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--bor
 .version-text  { font-weight: 500; color: #334155; }
 .version-empty { color: #cbd5e1; user-select: none; }
 
-.cell-links { display: flex; flex-wrap: nowrap; gap: 3px; margin-bottom: 3px; }
+.cell-links { display: flex; flex-direction: column; gap: 2px; margin-bottom: 3px; }
 .sub-link {
   font-size: 10px; color: #64748b; text-decoration: none;
   background: #f1f5f9; border-radius: 3px; padding: 1px 5px;
@@ -234,7 +234,7 @@ a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
 </style>
 </head>
 <body>
-<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="ci-icon ci-success">✓</span> CI pass</span><span class="leg"><span class="ci-icon ci-failed">✗</span> CI fail</span><span class="leg"><span class="ci-icon ci-running">●</span> running</span><span class="leg"><span class="ci-icon ci-unknown">–</span> not configured</span><span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span></div><span class="bar-tag">EDP</span><span class="bar-ts">Generated 2026-04-16 01:40 UTC</span></div>
+<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="ci-icon ci-success">✓</span> CI pass</span><span class="leg"><span class="ci-icon ci-failed">✗</span> CI fail</span><span class="leg"><span class="ci-icon ci-running">●</span> running</span><span class="leg"><span class="ci-icon ci-unknown">–</span> not configured</span><span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span></div><span class="bar-tag">EDP</span><span class="bar-ts">Generated 2026-04-16 01:47 UTC</span></div>
 <div class="wrap"><table>
 <thead>
 <tr class="gh">
@@ -257,6 +257,15 @@ a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
 </tr>
 </thead>
 <tbody>
+<tr class="ur"><td class="ur-label">Last Update</td><td></td>
+<td class="vc">2026-04-15 01:09:55</td>
+<td class="vc">2026-04-15 01:10:00</td>
+<td class="vc">2026-04-15 01:10:04</td>
+<td class="vc">2026-04-15 17:50:02</td>
+<td class="vc">2026-04-15 17:57:23</td>
+<td class="vc">2026-04-15 18:20:22</td>
+<td class="vc">2026-04-15 11:15:12</td>
+</tr>
 <tr class="pr"><td class="lp"><div class="phead"><span class="pname">EDP Client Access 1.5</span></div><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a><a href="https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/120914395/Client+Access+ARCH" class="plink" target="_blank">architecture</a></div></td><td class="lt"></td>
 <td class="vc"><div class="cell-v"><a href="https://client-access.ice.infra.dev.nzero.test/docs" class="version-link" target="_blank">1.5-1.4.0</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2101" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
 <td class="vc"><div class="cell-v"><a href="https://client-access.ice.infra.test.nzero.test/docs" class="version-link" target="_blank">1.5-1.4.0</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2102" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
@@ -535,15 +544,6 @@ a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
 <td class="vc"><div class="cell-v"><span class="version-text">4.9.13</span></div><div class="cell-links"><a href="demfra1-z1-b7.infra.nzero.app" class="sub-link" target="_blank">demfra1-z1-b7</a><a href="demfra1-z1-b8.infra.nzero.app" class="sub-link" target="_blank">demfra1-z1-b8</a><a href="demfra1-z2-b7.infra.nzero.app" class="sub-link" target="_blank">demfra1-z2-b7</a><a href="demfra1-z2-b8.infra.nzero.app" class="sub-link" target="_blank">demfra1-z2-b8</a></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
 <td class="vc"><div class="cell-v"><span class="version-text">4.9.13</span></div><div class="cell-links"><a href="bembru1-z1-b7.infra.nzero.be" class="sub-link" target="_blank">bembru1-z1-b7</a><a href="bembru1-z1-b8.infra.nzero.be" class="sub-link" target="_blank">bembru1-z1-b8</a><a href="bembru1-z2-b7.infra.nzero.be" class="sub-link" target="_blank">bembru1-z2-b7</a><a href="bembru1-z2-b8.infra.nzero.be" class="sub-link" target="_blank">bembru1-z2-b8</a></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
 <td class="vc"><div class="cell-v"><span class="version-text">4.9.13</span></div><div class="cell-links"><a href="dember1-z1-b7.infra.nzero.de" class="sub-link" target="_blank">dember1-z1-b7</a><a href="dember1-z1-b8.infra.nzero.de" class="sub-link" target="_blank">dember1-z1-b8</a><a href="dember1-z2-b7.infra.nzero.de" class="sub-link" target="_blank">dember1-z2-b7</a><a href="dember1-z2-b8.infra.nzero.de" class="sub-link" target="_blank">dember1-z2-b8</a></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
-</tr>
-<tr class="ur"><td class="ur-label">Last Update</td><td></td>
-<td class="vc">2026-04-15 01:09:55</td>
-<td class="vc">2026-04-15 01:10:00</td>
-<td class="vc">2026-04-15 01:10:04</td>
-<td class="vc">2026-04-15 17:50:02</td>
-<td class="vc">2026-04-15 17:57:23</td>
-<td class="vc">2026-04-15 18:20:22</td>
-<td class="vc">2026-04-15 11:15:12</td>
 </tr>
 </tbody>
 </table></div>

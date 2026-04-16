@@ -398,7 +398,7 @@ td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--bor
 .version-text  { font-weight: 500; color: #334155; }
 .version-empty { color: #cbd5e1; user-select: none; }
 
-.cell-links { display: flex; flex-wrap: nowrap; gap: 3px; margin-bottom: 3px; }
+.cell-links { display: flex; flex-direction: column; gap: 2px; margin-bottom: 3px; }
 .sub-link {
   font-size: 10px; color: #64748b; text-decoration: none;
   background: #f1f5f9; border-radius: 3px; padding: 1px 5px;
@@ -633,6 +633,13 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
     # ── Table body ─────────────────────────────────────────────────────────
     p.append('<tbody>')
 
+    # Last-update row — first row of the table
+    p.append('<tr class="ur"><td class="ur-label">Last Update</td><td></td>')
+    for env in envs:
+        val = versions.get(env["name"], {}).get("update_time", "")
+        p.append(f'<td class="vc">{esc(val)}</td>')
+    p.append('</tr>')
+
     # Product rows
     for product in products:
         key       = product["key"]
@@ -686,13 +693,6 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
             for env in envs:
                 p.append(version_cell(env["name"], tkey, versions, ci_status, show_ci=False))
             p.append('</tr>')
-
-    # Last-update row — last row of the table
-    p.append('<tr class="ur"><td class="ur-label">Last Update</td><td></td>')
-    for env in envs:
-        val = versions.get(env["name"], {}).get("update_time", "")
-        p.append(f'<td class="vc">{esc(val)}</td>')
-    p.append('</tr>')
 
     p.append('</tbody>')
     p.append('</table></div>')
