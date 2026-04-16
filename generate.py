@@ -413,12 +413,12 @@ td.lp, td.lt {
   background: #f4f6f8; padding: 8px 10px; vertical-align: top;
 }
 td.lp {
-  left: 0; width: 1px; white-space: nowrap;
+  left: 0; width: 1px;
   border-left:  2px solid #0f172a;
   border-right: none;
 }
 td.lt {
-  left: 0; width: 1px; white-space: nowrap;  /* left set by JS */
+  left: 0; width: 1px;  /* left set by JS */
   border-left:  none;
   border-right: none;
   /* box-shadow travels with the sticky element — visible right border when scrolling */
@@ -428,10 +428,10 @@ td.lt {
 /* product row */
 tr.pr { background: #fff; }
 tr.pr td.lp { border-left: 3px solid #3b82f6; }
-.pname { font-weight: 700; color: #0f172a; font-size: 13px; line-height: 1.3; }
+.pname { font-weight: 700; color: #0f172a; font-size: 13px; line-height: 1.3; overflow-wrap: break-word; word-break: break-word; }
 .phead { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 3px; }
 .plinks { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; }
-.plink  { font-size: 10px; color: #64748b; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plink  { font-size: 10px; color: #64748b; text-decoration: none; overflow-wrap: break-word; word-break: break-word; }
 .plink:hover { color: #2563eb; }
 .jira-lnk { font-size: 10px; color: #0052cc; text-decoration: none; margin-top: 3px; display: inline-block; }
 .jira-lnk:hover { text-decoration: underline; }
@@ -439,7 +439,7 @@ tr.pr td.lp { border-left: 3px solid #3b82f6; }
 /* template row */
 tr.tr { background: #f8fafc; }
 tr.tr td.lt { padding-left: 16px; color: #475569; font-size: 11px; }
-.tname { display: block; color: #475569; font-size: 11px; }
+.tname { display: block; color: #475569; font-size: 11px; overflow-wrap: break-word; word-break: break-all; }
 
 /* update row — last row of the table */
 tr.ur { background: #f8fafc; border-top: 2px solid var(--border); }
