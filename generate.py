@@ -321,8 +321,6 @@ CSS = """
   --border: #e2e8f0;
   --text: #0f172a;
   --muted: #64748b;
-  --col-p: 160px;
-  --col-t: 145px;
   --bar-h: 52px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -398,7 +396,7 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
   border-right: none !important;
 }
 .gh .sl2, .eh .sl2 {
-  position: sticky !important; left: var(--col-p); z-index: 95 !important;
+  position: sticky !important; left: 0; z-index: 95 !important;  /* left set by JS */
   background: #1e293b !important;
   border-right: none !important;
   /* box-shadow travels with the sticky element, acting as a fixed right border */
@@ -415,12 +413,12 @@ td.lp, td.lt {
   background: #f4f6f8; padding: 8px 10px; vertical-align: top;
 }
 td.lp {
-  left: 0; min-width: var(--col-p); max-width: var(--col-p); width: var(--col-p);
+  left: 0; width: 1px; white-space: nowrap;
   border-left:  2px solid #0f172a;
   border-right: none;
 }
 td.lt {
-  left: var(--col-p); min-width: var(--col-t); max-width: var(--col-t); width: var(--col-t);
+  left: 0; width: 1px; white-space: nowrap;  /* left set by JS */
   border-left:  none;
   border-right: none;
   /* box-shadow travels with the sticky element — visible right border when scrolling */
@@ -554,6 +552,22 @@ a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
 JS = r"""
 (function () {
   'use strict';
+
+  /* ── Fix left offset of second sticky column after layout ── */
+  function fixStickyCol2() {
+    var firstCell = document.querySelector('td.lp, th.sl1');
+    if (!firstCell) return;
+    var w = firstCell.offsetWidth + 'px';
+    document.querySelectorAll('td.lt, th.sl2').forEach(function (el) {
+      el.style.left = w;
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixStickyCol2);
+  } else {
+    fixStickyCol2();
+  }
+
   var popup = document.getElementById('bug-popup');
   var hideTimer;
 
