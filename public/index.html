@@ -39,15 +39,19 @@ body { font-family: var(--font); font-size: 13px; background: var(--bg); color: 
 .leg { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b; }
 .leg .ci-icon { pointer-events: none; }
 
-/* ── table wrapper ── */
-.wrap { overflow-x: auto; min-height: calc(100vh - var(--bar-h)); }
+/* ── table wrapper — this IS the scroll container for the table ── */
+.wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  height: calc(100vh - var(--bar-h));  /* fill remaining viewport below the top bar */
+}
 table { border-collapse: collapse; width: max-content; min-width: 100%; background: var(--surface); }
-thead { border-bottom: 3px solid #475569; }
 
 /* ── group-header row ── */
 .gh { height: 26px; }
 .gh th {
-  position: sticky; top: var(--bar-h); z-index: 90;
+  /* top: 0 — relative to .wrap, which is now the scroll container */
+  position: sticky; top: 0; z-index: 90;
   padding: 0 8px; text-align: center;
   font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
   color: rgba(255,255,255,.65); white-space: nowrap;
@@ -60,10 +64,12 @@ thead { border-bottom: 3px solid #475569; }
 
 /* ── env-header row ── */
 .eh th {
-  position: sticky; top: calc(var(--bar-h) + 26px); z-index: 89;
+  /* top: 26px — exactly the height of .gh, relative to .wrap */
+  position: sticky; top: 26px; z-index: 89;
   padding: 6px 8px; text-align: center;
   font-size: 11px; font-weight: 600; color: #e2e8f0;
   border-right: 1px solid rgba(255,255,255,.07);
+  border-bottom: 3px solid #475569;  /* clear separator; reliable now that .wrap scrolls */
   width: 1px;           /* shrink to content; table-layout:auto does the rest */
   white-space: nowrap;
 }
@@ -228,7 +234,7 @@ a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
 </style>
 </head>
 <body>
-<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="ci-icon ci-success">✓</span> CI pass</span><span class="leg"><span class="ci-icon ci-failed">✗</span> CI fail</span><span class="leg"><span class="ci-icon ci-running">●</span> running</span><span class="leg"><span class="ci-icon ci-unknown">–</span> not configured</span><span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span></div><span class="bar-tag">EDP</span><span class="bar-ts">Generated 2026-04-16 01:34 UTC</span></div>
+<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="ci-icon ci-success">✓</span> CI pass</span><span class="leg"><span class="ci-icon ci-failed">✗</span> CI fail</span><span class="leg"><span class="ci-icon ci-running">●</span> running</span><span class="leg"><span class="ci-icon ci-unknown">–</span> not configured</span><span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span></div><span class="bar-tag">EDP</span><span class="bar-ts">Generated 2026-04-16 01:40 UTC</span></div>
 <div class="wrap"><table>
 <thead>
 <tr class="gh">

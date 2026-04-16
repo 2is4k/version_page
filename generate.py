@@ -289,15 +289,19 @@ body { font-family: var(--font); font-size: 13px; background: var(--bg); color: 
 .leg { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b; }
 .leg .ci-icon { pointer-events: none; }
 
-/* ── table wrapper ── */
-.wrap { overflow-x: auto; min-height: calc(100vh - var(--bar-h)); }
+/* ── table wrapper — this IS the scroll container for the table ── */
+.wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  height: calc(100vh - var(--bar-h));  /* fill remaining viewport below the top bar */
+}
 table { border-collapse: collapse; width: max-content; min-width: 100%; background: var(--surface); }
-thead { border-bottom: 3px solid #475569; }
 
 /* ── group-header row ── */
 .gh { height: 26px; }
 .gh th {
-  position: sticky; top: var(--bar-h); z-index: 90;
+  /* top: 0 — relative to .wrap, which is now the scroll container */
+  position: sticky; top: 0; z-index: 90;
   padding: 0 8px; text-align: center;
   font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
   color: rgba(255,255,255,.65); white-space: nowrap;
@@ -310,10 +314,12 @@ thead { border-bottom: 3px solid #475569; }
 
 /* ── env-header row ── */
 .eh th {
-  position: sticky; top: calc(var(--bar-h) + 26px); z-index: 89;
+  /* top: 26px — exactly the height of .gh, relative to .wrap */
+  position: sticky; top: 26px; z-index: 89;
   padding: 6px 8px; text-align: center;
   font-size: 11px; font-weight: 600; color: #e2e8f0;
   border-right: 1px solid rgba(255,255,255,.07);
+  border-bottom: 3px solid #475569;  /* clear separator; reliable now that .wrap scrolls */
   width: 1px;           /* shrink to content; table-layout:auto does the rest */
   white-space: nowrap;
 }
