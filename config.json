@@ -1,0 +1,557 @@
+{
+  "_comment": "ICE Infrastructure Dashboard Configuration. Replace all CONFIGURE_ME values before enabling live data.",
+  "gitlab_base_url": "https://gitlab.bare.pandrosion.org",
+  "jira_base_url":   "https://jira.bare.pandrosion.org",
+
+  "environments": [
+    {
+      "name": "InfraTestDev",  "url": ".dev.nzero.test",
+      "group": "infratest",    "group_label": "InfraTest"
+    },
+    {
+      "name": "InfraTestTest", "url": ".test.nzero.test",
+      "group": "infratest",    "group_label": "InfraTest"
+    },
+    {
+      "name": "InfraTestIntegration", "url": ".nzero.test",
+      "group": "infratest",           "group_label": "InfraTest"
+    },
+    {
+      "name": "VE",   "url": ".nzero.group",
+      "group": "ve",  "group_label": "VE"
+    },
+    {
+      "name": "AppDevTest", "url": ".nzero.app",
+      "group": "appdev",    "group_label": "AppDev"
+    },
+    {
+      "name": "ProdBelgium", "url": ".nzero.be",
+      "group": "prod",       "group_label": "Production"
+    },
+    {
+      "name": "ProdGermany", "url": ".nzero.de",
+      "group": "prod",       "group_label": "Production"
+    }
+  ],
+
+  "products": [
+    {
+      "key":  "ice_client_access",
+      "name": "EDP Client Access 1.5",
+      "jira_project": "CONFIGURE_ME",
+      "ci_project_id":  "CONFIGURE_ME",
+      "ci_project_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests",
+      "pipeline_env_mapping": {
+        "InfraTestDev": "InfraTestDev", "InfraTestTest": "InfraTestTest",
+        "InfraTestIntegration": "InfraTestIntegration", "VE": "VE",
+        "AppDevTest": "AppDevTest", "ProdBelgium": "ProdBelgium", "ProdGermany": "ProdGermany"
+      },
+      "additional_urls": [
+        { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access/-/blob/main/CHANGELOG.md" },
+        { "name": "architecture",  "url": "https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/120914395/Client+Access+ARCH" }
+      ],
+      "templates": [
+        {
+          "key": "create_rule_panorama", "name": "Create_Rule_Panorama",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {}
+        },
+        {
+          "key": "create_delete_rule_panorama", "name": "Create_Delete_Rule_Panorama",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {}
+        },
+        {
+          "key": "delete_active_rule_panorama", "name": "Delete_Active_Rule_Panorama",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {}
+        },
+        {
+          "key": "delete_inactive_rule_panorama", "name": "Delete_Inactive_Rule_Panorama",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {}
+        },
+        {
+          "key": "delete_rule_panorama", "name": "Delete_Rule_Panorama",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {}
+        },
+        {
+          "key": "search_rule_panorama", "name": "Search_Rule_Panorama",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {}
+        },
+        {
+          "key": "ipa_issue_user_cert", "name": "IPA_Issue_User_Cert",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {}
+        },
+        {
+          "key": "ipa_revoke_user_cert", "name": "IPA_Revoke_User_Cert",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {}
+        }
+      ]
+    },
+
+    {
+      "key":  "ice_core",
+      "name": "ICE Core",
+      "jira_project": "EDPIPCO",
+      "ci_project_id":  "CONFIGURE_ME",
+      "ci_project_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests",
+      "pipeline_env_mapping": {
+        "InfraTestDev": "InfraTestDev", "InfraTestTest": "InfraTestTest",
+        "InfraTestIntegration": "InfraTestIntegration", "VE": "VE",
+        "AppDevTest": "AppDevTest", "ProdBelgium": "ProdBelgium", "ProdGermany": "ProdGermany"
+      },
+      "additional_urls": [
+        { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-stack/-/blob/main/CHANGELOG.md" },
+        { "name": "AZ data",       "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/edp-az-data-master" }
+      ],
+      "templates": [
+        {
+          "key": "create_dns_zone", "name": "Create_DNS_Zone",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_dns_zone/-/blob/main/CHANGELOG.md" }
+          ]
+        },
+        {
+          "key": "create_l3_zone_apstra", "name": "Create_L3Zone_Apstra",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/blob/main/CHANGELOG.md" }
+          ]
+        },
+        {
+          "key": "create_l3_zone_cisco", "name": "Create_L3Zone_Cisco",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_cisco/-/blob/main/CHANGELOG.md" }
+          ]
+        },
+        {
+          "key": "create_compute_cluster_apstra", "name": "Create_Compute_Cluster_Apstra",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_compute_cluster_apstra/-/blob/main/CHANGELOG.md" }
+          ]
+        },
+        {
+          "key": "create_compute_cluster_cisco", "name": "Create_Compute_Cluster_Cisco",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_compute_cluster_cisco/-/blob/main/CHANGELOG.md" }
+          ]
+        },
+        {
+          "key": "create_virtual_machine", "name": "Create_Virtual_Machine",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_compute_node/-/blob/main/CHANGELOG.md" }
+          ]
+        },
+        {
+          "key": "create_dns_record", "name": "Create_DNS_Record",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_dns_record/-/blob/main/CHANGELOG.md" }
+          ]
+        },
+        {
+          "key": "update_dns_record", "name": "Update_DNS_Record",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_dns_record/-/blob/main/CHANGELOG.md" }
+          ]
+        },
+        {
+          "key": "delete_resource", "name": "Delete_Resource",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_resource_deletion/-/blob/main/CHANGELOG.md" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "key":  "ice_flow",
+      "name": "ICE Flow - Provisioning",
+      "jira_project": "EDPIPIF",
+      "ci_project_id":  "CONFIGURE_ME",
+      "ci_project_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests",
+      "pipeline_env_mapping": {
+        "InfraTestDev": "InfraTestDev", "InfraTestTest": "InfraTestTest",
+        "InfraTestIntegration": "InfraTestIntegration", "VE": "VE",
+        "AppDevTest": "AppDevTest", "ProdBelgium": "ProdBelgium", "ProdGermany": "ProdGermany"
+      },
+      "additional_urls": [
+        { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/iceflow/-/releases" },
+        { "name": "architecture",  "url": "https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/109445838/ICE+Flow+CA" }
+      ],
+      "templates": []
+    },
+
+    {
+      "key":  "workspace_ice_fow",
+      "name": "ICE Flow - Workspaces",
+      "jira_project": "EDPIPWS",
+      "ci_project_id":  "CONFIGURE_ME",
+      "ci_project_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests",
+      "pipeline_env_mapping": {
+        "InfraTestDev": "InfraTestDev", "InfraTestTest": "InfraTestTest",
+        "InfraTestIntegration": "InfraTestIntegration", "VE": "VE",
+        "AppDevTest": "AppDevTest", "ProdBelgium": "ProdBelgium", "ProdGermany": "ProdGermany"
+      },
+      "additional_urls": [
+        { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/iceflow/-/releases" },
+        { "name": "architecture",  "url": "https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/109445838/ICE+Flow+CA" }
+      ],
+      "templates": []
+    },
+
+    {
+      "key":  "ice_scape",
+      "name": "ICE Scape",
+      "jira_project": "EDPIPSC",
+      "ci_project_id":  "CONFIGURE_ME",
+      "ci_project_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests",
+      "pipeline_env_mapping": {
+        "InfraTestDev": "InfraTestDev", "InfraTestTest": "InfraTestTest",
+        "InfraTestIntegration": "InfraTestIntegration", "VE": "VE",
+        "AppDevTest": "AppDevTest", "ProdBelgium": "ProdBelgium", "ProdGermany": "ProdGermany"
+      },
+      "additional_urls": [
+        { "name": "release notes API", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-api/-/blob/main/CHANGELOG.md" },
+        { "name": "release notes UI",  "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-ui/-/blob/main/CHANGELOG.md" },
+        { "name": "architecture",      "url": "https://confluence.bare.pandrosion.org/spaces/INFRA/pages/244352847/ICE+Scape+ARCH" }
+      ],
+      "templates": []
+    },
+
+    {
+      "key":  "ipam",
+      "name": "IPAM",
+      "jira_project": "EDPIPAM",
+      "ci_project_id":  "CONFIGURE_ME",
+      "ci_project_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests",
+      "pipeline_env_mapping": {
+        "InfraTestDev": "InfraTestDev", "InfraTestTest": "InfraTestTest",
+        "InfraTestIntegration": "InfraTestIntegration"
+      },
+      "additional_urls": [
+        { "name": "architecture", "url": "https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/327057936/ICE+v2.1+IPAM+Service+Component" }
+      ],
+      "templates": []
+    },
+
+    {
+      "key":  "object_storage",
+      "name": "EDP Object Storage",
+      "jira_project": "EDPIPOS",
+      "ci_project_id":  "CONFIGURE_ME",
+      "ci_project_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests",
+      "pipeline_env_mapping": {
+        "InfraTestDev": "InfraTestDev", "InfraTestTest": "InfraTestTest",
+        "InfraTestIntegration": "InfraTestIntegration", "VE": "VE",
+        "AppDevTest": "AppDevTest", "ProdBelgium": "ProdBelgium", "ProdGermany": "ProdGermany"
+      },
+      "additional_urls": [
+        { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage/-/releases" }
+      ],
+      "templates": [
+        {
+          "key": "create_user_netapp", "name": "Create_User_NetApp",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp-object-storage/-/releases" }
+          ]
+        },
+        {
+          "key": "create_bucket_netapp", "name": "Create_Bucket_NetApp",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp-object-storage/-/releases" }
+          ]
+        },
+        {
+          "key": "create_bucket_option_netapp", "name": "Create_Bucket_Option_NetApp",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp-object-storage/-/releases" }
+          ]
+        },
+        {
+          "key": "remove_bucket_netapp", "name": "Remove_Bucket_NetApp",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp-object-storage/-/releases" }
+          ]
+        },
+        {
+          "key": "remove_user_netapp", "name": "Remove_User_NetApp",
+          "ci_project_id": "CONFIGURE_ME", "ci_project_url": "CONFIGURE_ME",
+          "pipeline_env_mapping": {},
+          "additional_urls": [
+            { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp-object-storage/-/releases" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "key":  "workspace_base_service",
+      "name": "EDP TPN 2.8 Workspace Service",
+      "jira_project": "EDPIPTN",
+      "ci_project_id":  "CONFIGURE_ME",
+      "ci_project_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/workspace-service-tests",
+      "pipeline_env_mapping": {
+        "InfraTestDev": "InfraTestDev"
+      },
+      "additional_urls": [
+        { "name": "architecture", "url": "https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/238949105/v2.1+Workspace+Connector+ARCH" }
+      ],
+      "templates": []
+    },
+
+    {
+      "key":  "ipa",
+      "name": "IPA",
+      "jira_project": "CONFIGURE_ME",
+      "ci_project_id":  "CONFIGURE_ME",
+      "ci_project_url": "CONFIGURE_ME",
+      "pipeline_env_mapping": {},
+      "additional_urls": [
+        { "name": "FreeIPA", "url": "https://www.freeipa.org/" }
+      ],
+      "templates": []
+    }
+  ],
+
+  "dummy_ci_status": {
+    "ice_client_access": {
+      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2101" },
+      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2102" },
+      "InfraTestIntegration":  { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2103" },
+      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2104" },
+      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2105" },
+      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2106" },
+      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2107" }
+    },
+    "create_rule_panorama": {
+      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2201" },
+      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2202" },
+      "InfraTestIntegration":  { "status": "failed",  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2203" },
+      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2204" },
+      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2205" },
+      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2206" },
+      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2207" }
+    },
+    "ice_core": {
+      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1001" },
+      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1002" },
+      "InfraTestIntegration":  { "status": "failed",  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1003" },
+      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1004" },
+      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1005" },
+      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1006" },
+      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1007" }
+    },
+    "create_l3_zone_apstra": {
+      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3001" },
+      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3002" },
+      "InfraTestIntegration":  { "status": "failed",  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3003" },
+      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3004" },
+      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3005" },
+      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3006" },
+      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3007" }
+    },
+    "ice_flow": {
+      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4001" },
+      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4002" },
+      "InfraTestIntegration":  { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4003" },
+      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4004" },
+      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4005" },
+      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4006" },
+      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4007" }
+    },
+    "workspace_ice_fow": {
+      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5001" },
+      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5002" },
+      "InfraTestIntegration":  { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5003" },
+      "VE":                    { "status": "failed",  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5004" },
+      "AppDevTest":            { "status": "running", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5005" },
+      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5006" },
+      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5007" }
+    },
+    "ice_scape": {
+      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6001" },
+      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6002" },
+      "InfraTestIntegration":  { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6003" },
+      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6004" },
+      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6005" },
+      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6006" },
+      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6007" }
+    },
+    "ipam": {
+      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7001" },
+      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7002" },
+      "InfraTestIntegration":  { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7003" }
+    },
+    "object_storage": {
+      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8001" },
+      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8002" },
+      "InfraTestIntegration":  { "status": "failed",  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8003" },
+      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8004" },
+      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8005" },
+      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8006" },
+      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8007" }
+    },
+    "workspace_base_service": {
+      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/workspace-service-tests/-/pipelines/9001" }
+    }
+  },
+
+  "dummy_jira_bugs": {
+    "ice_client_access": [],
+    "ice_core": [
+      {
+        "key": "EDPIPCO-234",
+        "summary": "[QA]: ICE Core provisioning fails when IPAM service is unavailable — timeout not handled gracefully",
+        "status": "In Progress",
+        "assignee": "Anna Schmidt",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPCO-234"
+      },
+      {
+        "key": "EDPIPCO-198",
+        "summary": "[QA]: Internal API returns 500 on concurrent AZ creation requests under load",
+        "status": "Open",
+        "assignee": "Marco Bianchi",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPCO-198"
+      }
+    ],
+    "ice_flow": [
+      {
+        "key": "EDPIPIF-445",
+        "summary": "[QA]: ICE Flow DNS zone workflow hangs indefinitely on InfraTestIntegration when upstream times out",
+        "status": "In Progress",
+        "assignee": "Elena Kovač",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPIF-445"
+      },
+      {
+        "key": "EDPIPIF-423",
+        "summary": "[QA]: Create VM workflow does not clean up partially created resources on failure — resource leak",
+        "status": "Open",
+        "assignee": "Thomas Weber",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPIF-423"
+      },
+      {
+        "key": "EDPIPIF-401",
+        "summary": "[QA]: L3 Zone Cisco template fails with malformed JSON response from Cisco APIC API",
+        "status": "In Review",
+        "assignee": "Elena Kovač",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPIF-401"
+      }
+    ],
+    "workspace_ice_fow": [
+      {
+        "key": "EDPIPWS-88",
+        "summary": "[QA]: Workspace provisioning fails silently when base service is not responding",
+        "status": "Open",
+        "assignee": "Unassigned",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPWS-88"
+      }
+    ],
+    "ice_scape": [],
+    "ipam": [
+      {
+        "key": "EDPIPAM-112",
+        "summary": "[QA]: IPAM returns incorrect subnet mask for /29 allocations in secondary AZ",
+        "status": "In Progress",
+        "assignee": "Piotr Nowak",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPAM-112"
+      },
+      {
+        "key": "EDPIPAM-108",
+        "summary": "[QA]: IPAM API does not respect X-Request-ID header for distributed tracing correlation",
+        "status": "Open",
+        "assignee": "Piotr Nowak",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPAM-108"
+      },
+      {
+        "key": "EDPIPAM-103",
+        "summary": "[QA]: IP release does not propagate to secondary AZ within SLA window",
+        "status": "Open",
+        "assignee": "Unassigned",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPAM-103"
+      },
+      {
+        "key": "EDPIPAM-97",
+        "summary": "[QA]: Bulk IP allocation fails silently when request exceeds 50 addresses",
+        "status": "In Progress",
+        "assignee": "Sophie Müller",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPAM-97"
+      },
+      {
+        "key": "EDPIPAM-91",
+        "summary": "[QA]: IPAM health check returns HTTP 200 when database connection is unreachable",
+        "status": "Open",
+        "assignee": "Unassigned",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPAM-91"
+      },
+      {
+        "key": "EDPIPAM-89",
+        "summary": "[QA]: IPAM allocation metrics not exported to Prometheus in production environments",
+        "status": "In Review",
+        "assignee": "Sophie Müller",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPAM-89"
+      }
+    ],
+    "object_storage": [
+      {
+        "key": "EDPIPOS-67",
+        "summary": "[QA]: NetApp bucket creation fails with 409 Conflict when bucket name contains uppercase letters",
+        "status": "In Progress",
+        "assignee": "Lars Jensen",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPOS-67"
+      },
+      {
+        "key": "EDPIPOS-63",
+        "summary": "[QA]: User quota not enforced for existing buckets after storage policy update",
+        "status": "Open",
+        "assignee": "Lars Jensen",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPOS-63"
+      },
+      {
+        "key": "EDPIPOS-61",
+        "summary": "[QA]: Object storage API returns incorrect ETag header format — breaks S3-compatible clients",
+        "status": "Open",
+        "assignee": "Unassigned",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPOS-61"
+      },
+      {
+        "key": "EDPIPOS-58",
+        "summary": "[QA]: Bucket deletion workflow leaves orphaned IAM policies in NetApp ONTAP",
+        "status": "In Review",
+        "assignee": "Maria Santos",
+        "url": "https://jira.bare.pandrosion.org/browse/EDPIPOS-58"
+      }
+    ],
+    "workspace_base_service": [],
+    "ipa": []
+  }
+}

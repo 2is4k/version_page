@@ -1,0 +1,110 @@
+{
+  "update_time": "2026-04-15 18:20:22",
+  "ice_flow": {
+    "version": "2.2-1.60.3",
+    "url": "https://iceflow-defsrv.iceflow.infra.nzero.be/docs",
+    "additional_urls": [
+      {
+        "name": "run service",
+        "url": "https://iceflow-runsrv.iceflow.infra.nzero.be/docs"
+      },
+      {
+        "name": "monitoring",
+        "url": "https://grafana.iceflow.infra.nzero.be"
+      }
+    ]
+  },
+  "ice_scape": {
+    "version": "0.1.0",
+    "url": "https://api-icescape.ice.infra.nzero.be/docs",
+    "additional_urls": [
+      {
+        "name": "UI",
+        "url": "https://ui.ice.infra.nzero.be"
+      }
+    ]
+  },
+  "ipam": {
+    "version": "ERROR"
+  },
+  "ice_core": {
+    "version": "1.5.8",
+    "url": "https://api.ice.infra.nzero.be/docs",
+    "additional_urls": [
+      {
+        "name": "internal API",
+        "url": "https://api-internal.ice.infra.nzero.be/docs"
+      },
+      {
+        "name": "monitoring",
+        "url": "https://grafana01.ice.infra.nzero.be"
+      }
+    ]
+  },
+  "create_dns_zone": "0.0.7",
+  "create_l3_zone_apstra": "0.0.33",
+  "create_l3_zone_cisco": "0.0.29",
+  "create_compute_cluster_apstra": "0.0.24",
+  "create_compute_cluster_cisco": "0.0.32",
+  "create_virtual_machine": "0.1.18",
+  "create_dns_record": "0.5.6",
+  "update_dns_record": "0.5.6",
+  "delete_resource": "0.3.4",
+  "object_storage": {
+    "version": "2.3-1.48.9",
+    "url": "https://oss.ice.infra.nzero.be/docs"
+  },
+  "create_user_netapp": "1.4.1",
+  "create_bucket_netapp": "1.4.1",
+  "create_bucket_option_netapp": "1.4.1",
+  "remove_bucket_netapp": "1.4.1",
+  "remove_user_netapp": "1.4.1",
+  "ice_client_access": {
+    "version": "ERROR"
+  },
+  "create_rule_panorama": "ERROR",
+  "create_delete_rule_panorama": "ERROR",
+  "delete_active_rule_panorama": "ERROR",
+  "delete_inactive_rule_panorama": "ERROR",
+  "delete_rule_panorama": "ERROR",
+  "search_rule_panorama": "ERROR",
+  "ipa_issue_user_cert": "ERROR",
+  "ipa_revoke_user_cert": "ERROR",
+  "workspace_base_service": {
+    "version": "ERROR"
+  },
+  "workspace_ice_fow": {
+    "version": "ERROR",
+    "additional_urls": [
+      {
+        "name": "run service",
+        "url": "https://if-workspaces-runsrv.ice.infra.nzero.be/docs"
+      },
+      {
+        "name": "monitoring",
+        "url": "https://grafana01.ice.infra.nzero.be"
+      }
+    ]
+  },
+  "ipa": {
+    "version": "4.9.13",
+    "additional_urls": [
+      {
+        "name": "bembru1-z1-b7",
+        "url": "bembru1-z1-b7.infra.nzero.be"
+      },
+      {
+        "name": "bembru1-z1-b8",
+        "url": "bembru1-z1-b8.infra.nzero.be"
+      },
+      {
+        "name": "bembru1-z2-b7",
+        "url": "bembru1-z2-b7.infra.nzero.be"
+      },
+      {
+        "name": "bembru1-z2-b8",
+        "url": "bembru1-z2-b8.infra.nzero.be"
+      }
+    ]
+  }
+}

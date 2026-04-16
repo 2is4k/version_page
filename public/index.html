@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICE Infrastructure Dashboard</title>
+<style>
+:root {
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --bg: #f1f5f9;
+  --surface: #fff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+  --col-p: 200px;
+  --col-t: 190px;
+  --bar-h: 52px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); font-size: 13px; background: var(--bg); color: var(--text); }
+
+/* ── top bar ── */
+.bar {
+  position: sticky; top: 0; z-index: 200;
+  height: var(--bar-h);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 20px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.4);
+}
+.bar-title { font-size: 15px; font-weight: 700; color: #f8fafc; letter-spacing: .02em; flex: 1; }
+.bar-tag {
+  font-size: 10px; font-weight: 700; background: #1e3a5f;
+  color: #60a5fa; padding: 3px 9px; border-radius: 4px;
+  letter-spacing: .08em; text-transform: uppercase;
+}
+.bar-ts { font-size: 11px; color: #475569; white-space: nowrap; }
+.bar-legend { display: flex; align-items: center; gap: 10px; margin-left: 12px; }
+.leg { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b; }
+.leg .ci-icon { pointer-events: none; }
+
+/* ── table wrapper ── */
+.wrap { overflow-x: auto; min-height: calc(100vh - var(--bar-h)); }
+table { border-collapse: collapse; width: max-content; min-width: 100%; background: var(--surface); }
+
+/* ── group-header row ── */
+.gh { height: 26px; }
+.gh th {
+  position: sticky; top: var(--bar-h); z-index: 90;
+  padding: 0 8px; text-align: center;
+  font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(255,255,255,.65); white-space: nowrap;
+}
+.gh .lbl  { background: #1e293b; color: #334155; }
+.gh .g-it { background: #1e3a8a; }
+.gh .g-ve { background: #3730a3; }
+.gh .g-ad { background: #0e7490; }
+.gh .g-pr { background: #92400e; }
+
+/* ── env-header row ── */
+.eh th {
+  position: sticky; top: calc(var(--bar-h) + 26px); z-index: 89;
+  padding: 6px 10px; text-align: center;
+  font-size: 11px; font-weight: 600; color: #e2e8f0;
+  border-right: 1px solid rgba(255,255,255,.07);
+  min-width: 160px;
+}
+.eh .lbl { background: #1e293b; text-align: left !important; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.eh .e-it { background: #1e3a8a; border-top: 2px solid #60a5fa; }
+.eh .e-ve { background: #312e81; border-top: 2px solid #818cf8; }
+.eh .e-ad { background: #155e75; border-top: 2px solid #22d3ee; }
+.eh .e-pr { background: #78350f; border-top: 2px solid #fbbf24; }
+.env-url  { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,.4); margin-top: 1px; }
+
+/* sticky first two cols in header */
+.gh .sl1, .eh .sl1 { position: sticky !important; left: 0; z-index: 95 !important; background: #1e293b !important; }
+.gh .sl2, .eh .sl2 { position: sticky !important; left: var(--col-p); z-index: 95 !important; background: #1e293b !important; }
+
+/* ── tbody rows ── */
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:hover td { background: #f0f9ff !important; }
+
+/* sticky label cells */
+td.lp, td.lt {
+  position: sticky; z-index: 10;
+  background: inherit; padding: 8px 10px; vertical-align: top;
+  border-right: 1px solid var(--border);
+}
+td.lp { left: 0; min-width: var(--col-p); max-width: var(--col-p); width: var(--col-p); }
+td.lt { left: var(--col-p); min-width: var(--col-t); max-width: var(--col-t); width: var(--col-t); }
+
+/* product row */
+tr.pr { background: #fff; }
+tr.pr td.lp { border-left: 3px solid #3b82f6; }
+.pname { font-weight: 700; color: #0f172a; font-size: 13px; line-height: 1.3; }
+.phead { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 3px; }
+.plinks { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; }
+.plink  { font-size: 10px; color: #64748b; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plink:hover { color: #2563eb; }
+.jira-lnk { font-size: 10px; color: #0052cc; text-decoration: none; margin-top: 3px; display: inline-block; }
+.jira-lnk:hover { text-decoration: underline; }
+
+/* template row */
+tr.tr { background: #f8fafc; }
+tr.tr td.lt { padding-left: 16px; color: #475569; font-size: 12px; }
+.tname { display: block; color: #475569; }
+
+/* update row */
+tr.ur { background: #f8fafc; }
+tr.ur td { font-size: 11px; color: var(--muted); padding: 6px 10px; font-style: italic; }
+
+/* ── version cells ── */
+td.vc { padding: 7px 10px; vertical-align: top; border-right: 1px solid var(--border); }
+
+.cell-v { margin-bottom: 2px; }
+.version-link  { font-weight: 600; color: #2563eb; text-decoration: none; font-size: 13px; }
+.version-link:hover { text-decoration: underline; }
+.version-text  { font-weight: 500; color: #334155; }
+.version-empty { color: #cbd5e1; user-select: none; }
+
+.cell-links { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 3px; }
+.sub-link {
+  font-size: 10px; color: #64748b; text-decoration: none;
+  background: #f1f5f9; border-radius: 3px; padding: 1px 5px;
+  white-space: nowrap;
+}
+.sub-link:hover { background: #e2e8f0; color: #1e293b; }
+
+.cell-meta { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+
+/* ── CI icons ── */
+.ci-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  font-size: 11px; font-weight: 700; line-height: 1;
+  text-decoration: none; flex-shrink: 0;
+  transition: transform .12s, opacity .12s;
+}
+a.ci-icon { cursor: pointer; }
+a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
+.ci-success  { background: #16a34a; color: #fff; }
+.ci-failed   { background: #dc2626; color: #fff; }
+.ci-running  { background: #d97706; color: #fff; animation: pulse 1.5s infinite; }
+.ci-canceled { background: #6b7280; color: #fff; }
+.ci-unknown  { background: #e2e8f0; color: #94a3b8; font-size: 13px; }
+
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.55 } }
+
+/* ── Bug badges ── */
+.bug-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 18px; border-radius: 9px;
+  font-size: 11px; font-weight: 700; color: #fff;
+  padding: 0 5px; cursor: pointer; user-select: none;
+  transition: transform .12s, opacity .12s;
+  flex-shrink: 0;
+}
+.bug-badge:hover { opacity: .85; transform: scale(1.1); }
+.bug-low  { background: #ca8a04; }
+.bug-mid  { background: #ea580c; }
+.bug-high { background: #dc2626; }
+
+/* ── Bug popup ── */
+#bug-popup {
+  display: none; position: fixed; z-index: 9999;
+  background: #1e293b; color: #e2e8f0;
+  border-radius: 10px; padding: 14px 16px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06);
+  min-width: 500px; max-width: 680px;
+  max-height: 440px; overflow-y: auto;
+}
+#bug-popup::-webkit-scrollbar { width: 5px; }
+#bug-popup::-webkit-scrollbar-track { background: #0f172a; }
+#bug-popup::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+#bug-popup h4 {
+  font-size: 11px; font-weight: 700; color: #64748b;
+  text-transform: uppercase; letter-spacing: .09em;
+  margin-bottom: 10px; padding-bottom: 8px;
+  border-bottom: 1px solid #334155;
+}
+.bp-header {
+  display: grid; grid-template-columns: 95px 1fr 95px 140px;
+  gap: 8px; font-size: 9px; font-weight: 700; color: #334155;
+  text-transform: uppercase; letter-spacing: .07em;
+  margin-bottom: 6px; padding-bottom: 4px;
+}
+.bt {
+  display: grid; grid-template-columns: 95px 1fr 95px 140px;
+  gap: 8px; padding: 6px 0; border-top: 1px solid #1e3a5f20;
+  align-items: start;
+}
+.bt:first-of-type { border-top-color: #334155; }
+.bt-key a  { color: #60a5fa; text-decoration: none; font-weight: 700; font-size: 11px; }
+.bt-key a:hover { text-decoration: underline; color: #93c5fd; }
+.bt-sum    { color: #cbd5e1; font-size: 11px; line-height: 1.4;
+             overflow: hidden; display: -webkit-box;
+             -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.bt-sta    { text-align: center; }
+.s-pill    { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+.s-open     { background: #0f172a; color: #64748b; border: 1px solid #334155; }
+.s-progress { background: #1e3a8a; color: #93c5fd; }
+.s-review   { background: #312e81; color: #a5b4fc; }
+.bt-asgn   { color: #64748b; font-size: 10px; line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="ci-icon ci-success">✓</span> CI pass</span><span class="leg"><span class="ci-icon ci-failed">✗</span> CI fail</span><span class="leg"><span class="ci-icon ci-running">●</span> running</span><span class="leg"><span class="ci-icon ci-unknown">–</span> not configured</span><span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span></div><span class="bar-tag">EDP</span><span class="bar-ts">Generated 2026-04-16 00:59 UTC</span></div>
+<div class="wrap"><table>
+<thead>
+<tr class="gh">
+<th class="lbl sl1"></th><th class="lbl sl2"></th>
+<th class="g-it" colspan="3">InfraTest</th>
+<th class="g-ve" colspan="1">VE</th>
+<th class="g-ad" colspan="1">AppDev</th>
+<th class="g-pr" colspan="2">Production</th>
+</tr>
+<tr class="eh">
+<th class="lbl sl1">Product</th>
+<th class="lbl sl2">Workflow Template</th>
+<th class="e-it">InfraTestDev<span class="env-url">.dev.nzero.test</span></th>
+<th class="e-it">InfraTestTest<span class="env-url">.test.nzero.test</span></th>
+<th class="e-it">InfraTestIntegration<span class="env-url">.nzero.test</span></th>
+<th class="e-ve">VE<span class="env-url">.nzero.group</span></th>
+<th class="e-ad">AppDevTest<span class="env-url">.nzero.app</span></th>
+<th class="e-pr">ProdBelgium<span class="env-url">.nzero.be</span></th>
+<th class="e-pr">ProdGermany<span class="env-url">.nzero.de</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="ur"><td class="lp">Last Update</td><td class="lt"></td>
+<td class="vc">2026-04-15 01:09:55</td>
+<td class="vc">2026-04-15 01:10:00</td>
+<td class="vc">2026-04-15 01:10:04</td>
+<td class="vc">2026-04-15 17:50:02</td>
+<td class="vc">2026-04-15 17:57:23</td>
+<td class="vc">2026-04-15 18:20:22</td>
+<td class="vc">2026-04-15 11:15:12</td>
+</tr>
+<tr class="pr"><td class="lp"><div class="phead"><span class="pname">EDP Client Access 1.5</span></div><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a><a href="https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/120914395/Client+Access+ARCH" class="plink" target="_blank">architecture</a></div></td><td class="lt"></td>
+<td class="vc"><div class="cell-v"><a href="https://client-access.ice.infra.dev.nzero.test/docs" class="version-link" target="_blank">1.5-1.4.0</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2101" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://client-access.ice.infra.test.nzero.test/docs" class="version-link" target="_blank">1.5-1.4.0</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2102" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://client-access.ice.infra.nzero.test/docs" class="version-link" target="_blank">1.5-1.3.2</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2103" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://client-access.ice.infra.nzero.group/docs" class="version-link" target="_blank">1.5-1.3.2</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2104" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2105" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2106" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2107" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_Rule_Panorama</span></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2201" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2202" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2203" class="ci-icon ci-failed" title="CI: failed" target="_blank">✗</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2204" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2205" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2206" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2207" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_Delete_Rule_Panorama</span></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Delete_Active_Rule_Panorama</span></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Delete_Inactive_Rule_Panorama</span></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Delete_Rule_Panorama</span></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Search_Rule_Panorama</span></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">IPA_Issue_User_Cert</span></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">IPA_Revoke_User_Cert</span></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="pr"><td class="lp"><div class="phead"><span class="pname">ICE Core</span><span class="bug-badge bug-low" data-bugs="[{&quot;key&quot;: &quot;EDPIPCO-234&quot;, &quot;summary&quot;: &quot;[QA]: ICE Core provisioning fails when IPAM service is unavailable \u2014 timeout not handled gracefully&quot;, &quot;status&quot;: &quot;In Progress&quot;, &quot;assignee&quot;: &quot;Anna Schmidt&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPCO-234&quot;}, {&quot;key&quot;: &quot;EDPIPCO-198&quot;, &quot;summary&quot;: &quot;[QA]: Internal API returns 500 on concurrent AZ creation requests under load&quot;, &quot;status&quot;: &quot;Open&quot;, &quot;assignee&quot;: &quot;Marco Bianchi&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPCO-198&quot;}]" data-product="ICE Core" title="2 open QA bug(s) — hover for details">2</span></div><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-stack/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/edp-az-data-master" class="plink" target="_blank">AZ data</a></div><a href="https://jira.bare.pandrosion.org/projects/EDPIPCO" class="jira-lnk" target="_blank">JIRA: EDPIPCO</a></td><td class="lt"></td>
+<td class="vc"><div class="cell-v"><a href="https://api.ice.infra.dev.nzero.test/docs" class="version-link" target="_blank">1.7.6</a></div><div class="cell-links"><a href="https://api-internal.ice.infra.dev.nzero.test/docs" class="sub-link" target="_blank">internal API</a><a href="https://grafana01.ice.infra.dev.nzero.test" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1001" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api.ice.infra.test.nzero.test/docs" class="version-link" target="_blank">1.7.6</a></div><div class="cell-links"><a href="https://api-internal.ice.infra.test.nzero.test/docs" class="sub-link" target="_blank">internal API</a><a href="https://grafana01.ice.infra.test.nzero.test" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1002" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api.ice.infra.nzero.test/docs" class="version-link" target="_blank">1.7.6</a></div><div class="cell-links"><a href="https://api-internal.ice.infra.nzero.test/docs" class="sub-link" target="_blank">internal API</a><a href="https://grafana01.ice.infra.nzero.test" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1003" class="ci-icon ci-failed" title="CI: failed" target="_blank">✗</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api.ice.infra.nzero.group/docs" class="version-link" target="_blank">1.7.6</a></div><div class="cell-links"><a href="https://api-internal.ice.infra.nzero.group/docs" class="sub-link" target="_blank">internal API</a><a href="https://grafana01.ice.infra.nzero.group" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1004" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api.ice.infra.nzero.app/docs" class="version-link" target="_blank">1.5.8</a></div><div class="cell-links"><a href="https://api-internal.ice.infra.nzero.app/docs" class="sub-link" target="_blank">internal API</a><a href="https://grafana01.ice.infra.nzero.app" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1005" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api.ice.infra.nzero.be/docs" class="version-link" target="_blank">1.5.8</a></div><div class="cell-links"><a href="https://api-internal.ice.infra.nzero.be/docs" class="sub-link" target="_blank">internal API</a><a href="https://grafana01.ice.infra.nzero.be" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1006" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api.ice.infra.nzero.de/docs" class="version-link" target="_blank">1.5.8</a></div><div class="cell-links"><a href="https://api-internal.ice.infra.nzero.de/docs" class="sub-link" target="_blank">internal API</a><a href="https://grafana01.ice.infra.nzero.de" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1007" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_DNS_Zone</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_dns_zone/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.7</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.7</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.7</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.7</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.7</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.7</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.7</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_L3Zone_Apstra</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3001" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3002" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3003" class="ci-icon ci-failed" title="CI: failed" target="_blank">✗</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.34</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3004" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.33</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3005" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.33</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3006" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.33</span></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3007" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_L3Zone_Cisco</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_cisco/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.30</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.30</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.30</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.30</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.29</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.29</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.29</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_Compute_Cluster_Apstra</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_compute_cluster_apstra/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.24</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.24</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.24</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.24</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.24</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.24</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.24</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_Compute_Cluster_Cisco</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_compute_cluster_cisco/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.32</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.32</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.32</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.32</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.32</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.32</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.0.32</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_Virtual_Machine</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_compute_node/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.1.18</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.1.18</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.1.18</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.1.18</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.1.18</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.1.18</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.1.18</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_DNS_Record</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_dns_record/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.16</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.16</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.8</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.6</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.6</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.6</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.6</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Update_DNS_Record</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_dns_record/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.16</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.16</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.8</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.6</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.6</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.6</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.5.6</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Delete_Resource</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_resource_deletion/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.3.12</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.3.12</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.3.4</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.3.4</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.3.4</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.3.4</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">0.3.4</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="pr"><td class="lp"><div class="phead"><span class="pname">ICE Flow - Provisioning</span><span class="bug-badge bug-mid" data-bugs="[{&quot;key&quot;: &quot;EDPIPIF-445&quot;, &quot;summary&quot;: &quot;[QA]: ICE Flow DNS zone workflow hangs indefinitely on InfraTestIntegration when upstream times out&quot;, &quot;status&quot;: &quot;In Progress&quot;, &quot;assignee&quot;: &quot;Elena Kova\u010d&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPIF-445&quot;}, {&quot;key&quot;: &quot;EDPIPIF-423&quot;, &quot;summary&quot;: &quot;[QA]: Create VM workflow does not clean up partially created resources on failure \u2014 resource leak&quot;, &quot;status&quot;: &quot;Open&quot;, &quot;assignee&quot;: &quot;Thomas Weber&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPIF-423&quot;}, {&quot;key&quot;: &quot;EDPIPIF-401&quot;, &quot;summary&quot;: &quot;[QA]: L3 Zone Cisco template fails with malformed JSON response from Cisco APIC API&quot;, &quot;status&quot;: &quot;In Review&quot;, &quot;assignee&quot;: &quot;Elena Kova\u010d&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPIF-401&quot;}]" data-product="ICE Flow - Provisioning" title="3 open QA bug(s) — hover for details">3</span></div><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/iceflow/-/releases" class="plink" target="_blank">release notes</a><a href="https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/109445838/ICE+Flow+CA" class="plink" target="_blank">architecture</a></div><a href="https://jira.bare.pandrosion.org/projects/EDPIPIF" class="jira-lnk" target="_blank">JIRA: EDPIPIF</a></td><td class="lt"></td>
+<td class="vc"><div class="cell-v"><a href="https://iceflow-defsrv.iceflow.infra.dev.nzero.test/docs" class="version-link" target="_blank">2.2-1.63.0</a></div><div class="cell-links"><a href="https://iceflow-runsrv.iceflow.infra.dev.nzero.test/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana.iceflow.infra.dev.nzero.test" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4001" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://iceflow-defsrv.iceflow.infra.test.nzero.test/docs" class="version-link" target="_blank">2.2-1.62.0</a></div><div class="cell-links"><a href="https://iceflow-runsrv.iceflow.infra.test.nzero.test/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana.iceflow.infra.test.nzero.test" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4002" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://iceflow-defsrv.iceflow.infra.nzero.test/docs" class="version-link" target="_blank">2.2-1.62.0</a></div><div class="cell-links"><a href="https://iceflow-runsrv.iceflow.infra.nzero.test/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana.iceflow.infra.nzero.test" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4003" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://iceflow-defsrv.iceflow.infra.nzero.group/docs" class="version-link" target="_blank">2.2-1.62.0</a></div><div class="cell-links"><a href="https://iceflow-runsrv.iceflow.infra.nzero.group/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana.iceflow.infra.nzero.group" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4004" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://iceflow-defsrv.iceflow.infra.nzero.app/docs" class="version-link" target="_blank">2.2-1.60.3</a></div><div class="cell-links"><a href="https://iceflow-runsrv.iceflow.infra.nzero.app/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana.iceflow.infra.nzero.app" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4005" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://iceflow-defsrv.iceflow.infra.nzero.be/docs" class="version-link" target="_blank">2.2-1.60.3</a></div><div class="cell-links"><a href="https://iceflow-runsrv.iceflow.infra.nzero.be/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana.iceflow.infra.nzero.be" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4006" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://iceflow-defsrv.iceflow.infra.nzero.de/docs" class="version-link" target="_blank">2.2-1.60.3</a></div><div class="cell-links"><a href="https://iceflow-runsrv.iceflow.infra.nzero.de/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana.iceflow.infra.nzero.de" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4007" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+</tr>
+<tr class="pr"><td class="lp"><div class="phead"><span class="pname">ICE Flow - Workspaces</span><span class="bug-badge bug-low" data-bugs="[{&quot;key&quot;: &quot;EDPIPWS-88&quot;, &quot;summary&quot;: &quot;[QA]: Workspace provisioning fails silently when base service is not responding&quot;, &quot;status&quot;: &quot;Open&quot;, &quot;assignee&quot;: &quot;Unassigned&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPWS-88&quot;}]" data-product="ICE Flow - Workspaces" title="1 open QA bug(s) — hover for details">1</span></div><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/iceflow/-/releases" class="plink" target="_blank">release notes</a><a href="https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/109445838/ICE+Flow+CA" class="plink" target="_blank">architecture</a></div><a href="https://jira.bare.pandrosion.org/projects/EDPIPWS" class="jira-lnk" target="_blank">JIRA: EDPIPWS</a></td><td class="lt"></td>
+<td class="vc"><div class="cell-v"><a href="https://if-workspaces-defsrv.ice.infra.dev.nzero.test/docs" class="version-link" target="_blank">2.2-1.63.0</a></div><div class="cell-links"><a href="https://if-workspaces-runsrv.ice.infra.dev.nzero.test/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana01.ice.infra.dev.nzero.test" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5001" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-links"><a href="https://if-workspaces-runsrv.ice.infra.test.nzero.test/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana01.ice.infra.test.nzero.test" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5002" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-links"><a href="https://if-workspaces-runsrv.ice.infra.nzero.test/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana01.ice.infra.nzero.test" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5003" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-links"><a href="https://if-workspaces-runsrv.ice.infra.nzero.group/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana01.ice.infra.nzero.group" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5004" class="ci-icon ci-failed" title="CI: failed" target="_blank">✗</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-links"><a href="https://if-workspaces-runsrv.ice.infra.nzero.app/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana01.ice.infra.nzero.app" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5005" class="ci-icon ci-running" title="CI: running" target="_blank">●</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-links"><a href="https://if-workspaces-runsrv.ice.infra.nzero.be/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana01.ice.infra.nzero.be" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5006" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-links"><a href="https://if-workspaces-runsrv.ice.infra.nzero.de/docs" class="sub-link" target="_blank">run service</a><a href="https://grafana01.ice.infra.nzero.de" class="sub-link" target="_blank">monitoring</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5007" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+</tr>
+<tr class="pr"><td class="lp"><div class="phead"><span class="pname">ICE Scape</span></div><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-api/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes API</a><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-ui/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes UI</a><a href="https://confluence.bare.pandrosion.org/spaces/INFRA/pages/244352847/ICE+Scape+ARCH" class="plink" target="_blank">architecture</a></div><a href="https://jira.bare.pandrosion.org/projects/EDPIPSC" class="jira-lnk" target="_blank">JIRA: EDPIPSC</a></td><td class="lt"></td>
+<td class="vc"><div class="cell-v"><a href="https://api-icescape.ice.infra.dev.nzero.test/docs" class="version-link" target="_blank">0.1.0</a></div><div class="cell-links"><a href="https://ui.ice.infra.dev.nzero.test" class="sub-link" target="_blank">UI</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6001" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api-icescape.ice.infra.test.nzero.test/docs" class="version-link" target="_blank">0.1.0</a></div><div class="cell-links"><a href="https://ui.ice.infra.test.nzero.test" class="sub-link" target="_blank">UI</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6002" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api-icescape.ice.infra.nzero.test/docs" class="version-link" target="_blank">0.1.0</a></div><div class="cell-links"><a href="https://ui.ice.infra.nzero.test" class="sub-link" target="_blank">UI</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6003" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api-icescape.ice.infra.nzero.group/docs" class="version-link" target="_blank">0.1.0</a></div><div class="cell-links"><a href="https://ui.ice.infra.nzero.group" class="sub-link" target="_blank">UI</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6004" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api-icescape.ice.infra.nzero.app/docs" class="version-link" target="_blank">0.1.0</a></div><div class="cell-links"><a href="https://ui.ice.infra.nzero.app" class="sub-link" target="_blank">UI</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6005" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api-icescape.ice.infra.nzero.be/docs" class="version-link" target="_blank">0.1.0</a></div><div class="cell-links"><a href="https://ui.ice.infra.nzero.be" class="sub-link" target="_blank">UI</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6006" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://api-icescape.ice.infra.nzero.de/docs" class="version-link" target="_blank">0.1.0</a></div><div class="cell-links"><a href="https://ui.ice.infra.nzero.de" class="sub-link" target="_blank">UI</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6007" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+</tr>
+<tr class="pr"><td class="lp"><div class="phead"><span class="pname">IPAM</span><span class="bug-badge bug-high" data-bugs="[{&quot;key&quot;: &quot;EDPIPAM-112&quot;, &quot;summary&quot;: &quot;[QA]: IPAM returns incorrect subnet mask for /29 allocations in secondary AZ&quot;, &quot;status&quot;: &quot;In Progress&quot;, &quot;assignee&quot;: &quot;Piotr Nowak&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPAM-112&quot;}, {&quot;key&quot;: &quot;EDPIPAM-108&quot;, &quot;summary&quot;: &quot;[QA]: IPAM API does not respect X-Request-ID header for distributed tracing correlation&quot;, &quot;status&quot;: &quot;Open&quot;, &quot;assignee&quot;: &quot;Piotr Nowak&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPAM-108&quot;}, {&quot;key&quot;: &quot;EDPIPAM-103&quot;, &quot;summary&quot;: &quot;[QA]: IP release does not propagate to secondary AZ within SLA window&quot;, &quot;status&quot;: &quot;Open&quot;, &quot;assignee&quot;: &quot;Unassigned&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPAM-103&quot;}, {&quot;key&quot;: &quot;EDPIPAM-97&quot;, &quot;summary&quot;: &quot;[QA]: Bulk IP allocation fails silently when request exceeds 50 addresses&quot;, &quot;status&quot;: &quot;In Progress&quot;, &quot;assignee&quot;: &quot;Sophie M\u00fcller&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPAM-97&quot;}, {&quot;key&quot;: &quot;EDPIPAM-91&quot;, &quot;summary&quot;: &quot;[QA]: IPAM health check returns HTTP 200 when database connection is unreachable&quot;, &quot;status&quot;: &quot;Open&quot;, &quot;assignee&quot;: &quot;Unassigned&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPAM-91&quot;}, {&quot;key&quot;: &quot;EDPIPAM-89&quot;, &quot;summary&quot;: &quot;[QA]: IPAM allocation metrics not exported to Prometheus in production environments&quot;, &quot;status&quot;: &quot;In Review&quot;, &quot;assignee&quot;: &quot;Sophie M\u00fcller&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPAM-89&quot;}]" data-product="IPAM" title="6 open QA bug(s) — hover for details">6</span></div><div class="plinks"><a href="https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/327057936/ICE+v2.1+IPAM+Service+Component" class="plink" target="_blank">architecture</a></div><a href="https://jira.bare.pandrosion.org/projects/EDPIPAM" class="jira-lnk" target="_blank">JIRA: EDPIPAM</a></td><td class="lt"></td>
+<td class="vc"><div class="cell-v"><a href="https://edp-ipam.ice.infra.dev.nzero.test/docs" class="version-link" target="_blank">1.4.2</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7001" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://edp-ipam.ice.infra.test.nzero.test/docs" class="version-link" target="_blank">1.4.2</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7002" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://edp-ipam.ice.infra.nzero.test/docs" class="version-link" target="_blank">1.4.2</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7003" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="pr"><td class="lp"><div class="phead"><span class="pname">EDP Object Storage</span><span class="bug-badge bug-mid" data-bugs="[{&quot;key&quot;: &quot;EDPIPOS-67&quot;, &quot;summary&quot;: &quot;[QA]: NetApp bucket creation fails with 409 Conflict when bucket name contains uppercase letters&quot;, &quot;status&quot;: &quot;In Progress&quot;, &quot;assignee&quot;: &quot;Lars Jensen&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPOS-67&quot;}, {&quot;key&quot;: &quot;EDPIPOS-63&quot;, &quot;summary&quot;: &quot;[QA]: User quota not enforced for existing buckets after storage policy update&quot;, &quot;status&quot;: &quot;Open&quot;, &quot;assignee&quot;: &quot;Lars Jensen&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPOS-63&quot;}, {&quot;key&quot;: &quot;EDPIPOS-61&quot;, &quot;summary&quot;: &quot;[QA]: Object storage API returns incorrect ETag header format \u2014 breaks S3-compatible clients&quot;, &quot;status&quot;: &quot;Open&quot;, &quot;assignee&quot;: &quot;Unassigned&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPOS-61&quot;}, {&quot;key&quot;: &quot;EDPIPOS-58&quot;, &quot;summary&quot;: &quot;[QA]: Bucket deletion workflow leaves orphaned IAM policies in NetApp ONTAP&quot;, &quot;status&quot;: &quot;In Review&quot;, &quot;assignee&quot;: &quot;Maria Santos&quot;, &quot;url&quot;: &quot;https://jira.bare.pandrosion.org/browse/EDPIPOS-58&quot;}]" data-product="EDP Object Storage" title="4 open QA bug(s) — hover for details">4</span></div><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage/-/releases" class="plink" target="_blank">release notes</a></div><a href="https://jira.bare.pandrosion.org/projects/EDPIPOS" class="jira-lnk" target="_blank">JIRA: EDPIPOS</a></td><td class="lt"></td>
+<td class="vc"><div class="cell-v"><a href="https://oss.ice.infra.dev.nzero.test/docs" class="version-link" target="_blank">2.3-1.48.9</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8001" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://oss.ice.infra.test.nzero.test/docs" class="version-link" target="_blank">2.3-1.48.9</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8002" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://oss.ice.infra.nzero.test/docs" class="version-link" target="_blank">2.3-1.48.9</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8003" class="ci-icon ci-failed" title="CI: failed" target="_blank">✗</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://oss.ice.infra.nzero.group/docs" class="version-link" target="_blank">2.3-1.48.9</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8004" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://oss.ice.infra.nzero.app/docs" class="version-link" target="_blank">2.3-1.48.9</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8005" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://oss.ice.infra.nzero.be/docs" class="version-link" target="_blank">2.3-1.48.9</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8006" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><a href="https://oss.ice.infra.nzero.de/docs" class="version-link" target="_blank">2.3-1.48.9</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8007" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_User_NetApp</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp-object-storage/-/releases" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_Bucket_NetApp</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp-object-storage/-/releases" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Create_Bucket_Option_NetApp</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp-object-storage/-/releases" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Remove_Bucket_NetApp</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp-object-storage/-/releases" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="tr"><td class="lp"></td><td class="lt"><span class="tname">Remove_User_NetApp</span><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp-object-storage/-/releases" class="plink" target="_blank">release notes</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">1.4.1</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="pr"><td class="lp"><div class="phead"><span class="pname">EDP TPN 2.8 Workspace Service</span></div><div class="plinks"><a href="https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/238949105/v2.1+Workspace+Connector+ARCH" class="plink" target="_blank">architecture</a></div><a href="https://jira.bare.pandrosion.org/projects/EDPIPTN" class="jira-lnk" target="_blank">JIRA: EDPIPTN</a></td><td class="lt"></td>
+<td class="vc"><div class="cell-v"><a href="https://workspace-base.ice.infra.dev.nzero.test/docs" class="version-link" target="_blank">0.0.142</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/workspace-service-tests/-/pipelines/9001" class="ci-icon ci-success" title="CI: passed" target="_blank">✓</a></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+<tr class="pr"><td class="lp"><div class="phead"><span class="pname">IPA</span></div><div class="plinks"><a href="https://www.freeipa.org/" class="plink" target="_blank">FreeIPA</a></div></td><td class="lt"></td>
+<td class="vc"><div class="cell-v"><span class="version-text">4.9.13</span></div><div class="cell-links"><a href="demfra12-z1-b21.infra.nzero.test" class="sub-link" target="_blank">demfra12-z1-b21</a><a href="demfra12-z1-b7.infra.nzero.test" class="sub-link" target="_blank">demfra12-z1-b7</a><a href="demfra12-z1-b8.infra.nzero.test" class="sub-link" target="_blank">demfra12-z1-b8</a><a href="demfra12-z2-b21.infra.nzero.test" class="sub-link" target="_blank">demfra12-z2-b21</a><a href="demfra12-z2-b7.infra.nzero.test" class="sub-link" target="_blank">demfra12-z2-b7</a><a href="demfra12-z2-b8.infra.nzero.test" class="sub-link" target="_blank">demfra12-z2-b8</a></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">4.9.13</span></div><div class="cell-links"><a href="demfra12-z1-b21.infra.nzero.test" class="sub-link" target="_blank">demfra12-z1-b21</a><a href="demfra12-z1-b7.infra.nzero.test" class="sub-link" target="_blank">demfra12-z1-b7</a><a href="demfra12-z1-b8.infra.nzero.test" class="sub-link" target="_blank">demfra12-z1-b8</a><a href="demfra12-z2-b21.infra.nzero.test" class="sub-link" target="_blank">demfra12-z2-b21</a><a href="demfra12-z2-b7.infra.nzero.test" class="sub-link" target="_blank">demfra12-z2-b7</a><a href="demfra12-z2-b8.infra.nzero.test" class="sub-link" target="_blank">demfra12-z2-b8</a></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">4.9.13</span></div><div class="cell-links"><a href="demfra12-z1-b21.infra.nzero.test" class="sub-link" target="_blank">demfra12-z1-b21</a><a href="demfra12-z1-b7.infra.nzero.test" class="sub-link" target="_blank">demfra12-z1-b7</a><a href="demfra12-z1-b8.infra.nzero.test" class="sub-link" target="_blank">demfra12-z1-b8</a><a href="demfra12-z2-b21.infra.nzero.test" class="sub-link" target="_blank">demfra12-z2-b21</a><a href="demfra12-z2-b7.infra.nzero.test" class="sub-link" target="_blank">demfra12-z2-b7</a><a href="demfra12-z2-b8.infra.nzero.test" class="sub-link" target="_blank">demfra12-z2-b8</a></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-empty">—</span></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">4.9.13</span></div><div class="cell-links"><a href="demfra1-z1-b7.infra.nzero.app" class="sub-link" target="_blank">demfra1-z1-b7</a><a href="demfra1-z1-b8.infra.nzero.app" class="sub-link" target="_blank">demfra1-z1-b8</a><a href="demfra1-z2-b7.infra.nzero.app" class="sub-link" target="_blank">demfra1-z2-b7</a><a href="demfra1-z2-b8.infra.nzero.app" class="sub-link" target="_blank">demfra1-z2-b8</a></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">4.9.13</span></div><div class="cell-links"><a href="bembru1-z1-b7.infra.nzero.be" class="sub-link" target="_blank">bembru1-z1-b7</a><a href="bembru1-z1-b8.infra.nzero.be" class="sub-link" target="_blank">bembru1-z1-b8</a><a href="bembru1-z2-b7.infra.nzero.be" class="sub-link" target="_blank">bembru1-z2-b7</a><a href="bembru1-z2-b8.infra.nzero.be" class="sub-link" target="_blank">bembru1-z2-b8</a></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+<td class="vc"><div class="cell-v"><span class="version-text">4.9.13</span></div><div class="cell-links"><a href="dember1-z1-b7.infra.nzero.de" class="sub-link" target="_blank">dember1-z1-b7</a><a href="dember1-z1-b8.infra.nzero.de" class="sub-link" target="_blank">dember1-z1-b8</a><a href="dember1-z2-b7.infra.nzero.de" class="sub-link" target="_blank">dember1-z2-b7</a><a href="dember1-z2-b8.infra.nzero.de" class="sub-link" target="_blank">dember1-z2-b8</a></div><div class="cell-meta"><span class="ci-icon ci-unknown" title="CI: not configured">–</span></div></td>
+</tr>
+</tbody>
+</table></div>
+<div id="bug-popup"></div>
+<script>
+(function () {
+  'use strict';
+  var popup = document.getElementById('bug-popup');
+  var hideTimer;
+
+  function htmlEsc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showPopup(badge) {
+    clearTimeout(hideTimer);
+    var bugs    = JSON.parse(badge.dataset.bugs);
+    var product = badge.dataset.product || '';
+
+    var h = '<h4>' + htmlEsc(product) + ' &mdash; Open QA Bugs (' + bugs.length + ')</h4>';
+    h += '<div class="bp-header"><span>Ticket</span><span>Summary</span><span>Status</span><span>Assignee</span></div>';
+
+    bugs.forEach(function (b) {
+      var scls = /progress/i.test(b.status) ? 's-progress'
+               : /review/i.test(b.status)   ? 's-review'
+               : 's-open';
+      h += '<div class="bt">'
+         + '<div class="bt-key"><a href="' + htmlEsc(b.url) + '" target="_blank">' + htmlEsc(b.key) + '</a></div>'
+         + '<div class="bt-sum">' + htmlEsc(b.summary) + '</div>'
+         + '<div class="bt-sta"><span class="s-pill ' + scls + '">' + htmlEsc(b.status) + '</span></div>'
+         + '<div class="bt-asgn">' + htmlEsc(b.assignee) + '</div>'
+         + '</div>';
+    });
+
+    popup.innerHTML = h;
+
+    /* smart positioning: try right of badge, fall back to left */
+    var W  = 580, H = Math.min(440, 90 + bugs.length * 46);
+    var rc = badge.getBoundingClientRect();
+    var left = rc.right + 12;
+    var top  = rc.top - 4;
+
+    if (left + W > window.innerWidth  - 8) { left = rc.left - W - 12; }
+    if (top  + H > window.innerHeight - 8) { top  = window.innerHeight - H - 8; }
+    if (left < 8) left = 8;
+    if (top  < 52) top = 52;   /* don't overlap top bar */
+
+    popup.style.left    = left + 'px';
+    popup.style.top     = top  + 'px';
+    popup.style.display = 'block';
+  }
+
+  function hidePopup() {
+    hideTimer = setTimeout(function () { popup.style.display = 'none'; }, 160);
+  }
+
+  document.querySelectorAll('.bug-badge').forEach(function (b) {
+    b.addEventListener('mouseenter', function () { showPopup(b); });
+    b.addEventListener('mouseleave', hidePopup);
+  });
+  popup.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
+  popup.addEventListener('mouseleave', hidePopup);
+})();
+</script>
+</body></html>

@@ -1,0 +1,697 @@
+#!/usr/bin/env python3
+"""
+ICE Infrastructure Version Dashboard Generator
+
+Usage:
+  python generate.py              # Use live APIs if tokens available, else dummy data
+  python generate.py --dummy      # Force dummy data regardless of tokens
+
+Environment variables:
+  GITLAB_TOKEN   GitLab personal access token (needs read_api scope)
+  JIRA_TOKEN     JIRA personal access token
+  JIRA_USER      JIRA username / email address
+"""
+
+import json
+import os
+import sys
+import base64
+import urllib.request
+import urllib.error
+import urllib.parse
+from pathlib import Path
+from datetime import datetime, timezone
+from typing import Optional, Any
+
+BASE_DIR    = Path(__file__).parent
+FORCE_DUMMY = "--dummy" in sys.argv
+
+
+# ─── Loaders ─────────────────────────────────────────────────────────────────
+
+def load_config() -> dict:
+    return json.loads((BASE_DIR / "config.json").read_text(encoding="utf-8"))
+
+
+def load_versions(config: dict) -> dict:
+    out: dict = {}
+    for env in config["environments"]:
+        p = BASE_DIR / "versions" / f"{env['name']}.json"
+        out[env["name"]] = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+    return out
+
+
+# ─── HTTP helper ─────────────────────────────────────────────────────────────
+
+def _get(url: str, headers: dict) -> Optional[Any]:
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        print(f"  HTTP {e.code} ← {url}")
+    except Exception as e:
+        print(f"  Error ← {url}: {e}")
+    return None
+
+
+# ─── CI Status Fetcher ────────────────────────────────────────────────────────
+
+def fetch_ci_status(config: dict) -> dict:
+    """Returns {item_key: {env_name: {status, pipeline_url}}}"""
+
+    if FORCE_DUMMY or not os.environ.get("GITLAB_TOKEN"):
+        if not FORCE_DUMMY:
+            print("  GITLAB_TOKEN not set → using dummy CI data")
+        return config.get("dummy_ci_status", {})
+
+    token   = os.environ["GITLAB_TOKEN"]
+    base    = config["gitlab_base_url"].rstrip("/")
+    headers = {"PRIVATE-TOKEN": token}
+    result: dict = {}
+
+    def _fetch(key: str, project_id: Any, project_url: str, env_map: dict) -> dict:
+        if not project_id or str(project_id) == "CONFIGURE_ME":
+            return {}
+        enc  = urllib.parse.quote(str(project_id), safe="")
+        data = _get(f"{base}/api/v4/projects/{enc}/pipeline_schedules", headers)
+        if not data:
+            return {}
+        out: dict = {}
+        for sched in data:
+            env_name = env_map.get(sched.get("description", ""))
+            if not env_name:
+                continue
+            lp = sched.get("last_pipeline") or {}
+            out[env_name] = {
+                "status":       lp.get("status", "unknown"),
+                "pipeline_url": lp.get("web_url", project_url + "/-/pipelines"),
+            }
+        return out
+
+    for product in config["products"]:
+        key = product["key"]
+        print(f"  CI: {key}")
+        result[key] = _fetch(
+            key, product.get("ci_project_id"),
+            product.get("ci_project_url", ""),
+            product.get("pipeline_env_mapping", {}),
+        )
+        for tpl in product.get("templates", []):
+            tkey = tpl["key"]
+            result[tkey] = _fetch(
+                tkey, tpl.get("ci_project_id"),
+                tpl.get("ci_project_url", ""),
+                tpl.get("pipeline_env_mapping", {}),
+            )
+
+    return result
+
+
+# ─── JIRA Bug Fetcher ────────────────────────────────────────────────────────
+
+def fetch_jira_bugs(config: dict) -> dict:
+    """Returns {product_key: [{key, summary, status, assignee, url}]}"""
+
+    if FORCE_DUMMY or not (os.environ.get("JIRA_TOKEN") and os.environ.get("JIRA_USER")):
+        if not FORCE_DUMMY:
+            print("  JIRA_TOKEN/JIRA_USER not set → using dummy JIRA data")
+        return config.get("dummy_jira_bugs", {})
+
+    user    = os.environ["JIRA_USER"]
+    token   = os.environ["JIRA_TOKEN"]
+    base    = config["jira_base_url"].rstrip("/")
+    creds   = base64.b64encode(f"{user}:{token}".encode()).decode()
+    headers = {"Authorization": f"Basic {creds}", "Accept": "application/json"}
+    result: dict = {}
+
+    for product in config["products"]:
+        key          = product["key"]
+        jira_project = product.get("jira_project", "")
+        if not jira_project or jira_project == "CONFIGURE_ME":
+            result[key] = []
+            continue
+
+        print(f"  JIRA: {key} ({jira_project})")
+        jql = (
+            f'project = "{jira_project}" AND issuetype = Bug '
+            f'AND summary ~ "[QA]:" AND status NOT IN '
+            f'(Closed, Done, Cancelled, Resolved)'
+        )
+        url  = (
+            f"{base}/rest/api/2/search"
+            f"?jql={urllib.parse.quote(jql)}&maxResults=50&fields=summary,status,assignee"
+        )
+        data = _get(url, headers)
+        if not data:
+            result[key] = []
+            continue
+
+        tickets = []
+        for issue in data.get("issues", []):
+            f        = issue.get("fields", {})
+            assignee = (f.get("assignee") or {}).get("displayName", "Unassigned")
+            tickets.append({
+                "key":      issue["key"],
+                "summary":  f.get("summary", ""),
+                "status":   f.get("status", {}).get("name", "Unknown"),
+                "assignee": assignee,
+                "url":      f"{base}/browse/{issue['key']}",
+            })
+        result[key] = tickets
+
+    return result
+
+
+# ─── HTML helpers ─────────────────────────────────────────────────────────────
+
+def esc(s: Any) -> str:
+    return (str(s)
+            .replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace('"', "&quot;")
+            .replace("'", "&#39;"))
+
+
+CI_MAP = {
+    "success":  ("ci-success",  "✓", "CI: passed"),
+    "failed":   ("ci-failed",   "✗", "CI: failed"),
+    "running":  ("ci-running",  "●", "CI: running"),
+    "pending":  ("ci-running",  "●", "CI: pending"),
+    "canceled": ("ci-canceled", "○", "CI: canceled"),
+    "skipped":  ("ci-canceled", "○", "CI: skipped"),
+}
+
+
+def ci_icon(env_name: str, item_ci: dict) -> str:
+    info = item_ci.get(env_name) if item_ci else None
+    if not info:
+        return '<span class="ci-icon ci-unknown" title="CI: not configured">–</span>'
+    status = info.get("status", "unknown")
+    url    = info.get("pipeline_url", "")
+    cls, sym, title = CI_MAP.get(status, ("ci-unknown", "?", f"CI: {status}"))
+    if url:
+        return (f'<a href="{esc(url)}" class="ci-icon {cls}" '
+                f'title="{esc(title)}" target="_blank">{sym}</a>')
+    return f'<span class="ci-icon {cls}" title="{esc(title)}">{sym}</span>'
+
+
+def bug_badge(tickets: list, product_name: str) -> str:
+    n = len(tickets)
+    if not n:
+        return ""
+    lvl     = "bug-low" if n <= 2 else "bug-mid" if n <= 5 else "bug-high"
+    bugs_js = esc(json.dumps(tickets))
+    return (
+        f'<span class="bug-badge {lvl}" data-bugs="{bugs_js}" '
+        f'data-product="{esc(product_name)}" title="{n} open QA bug(s) — hover for details">'
+        f'{n}</span>'
+    )
+
+
+def version_cell(
+    env_name: str, item_key: str, versions: dict,
+    ci_status: dict, show_ci: bool = True,
+) -> str:
+    raw = versions.get(env_name, {}).get(item_key, "")
+
+    if isinstance(raw, dict):
+        version = raw.get("version", "")
+        url     = raw.get("url")
+        extras  = raw.get("additional_urls", [])
+    else:
+        version = str(raw) if raw else ""
+        url     = None
+        extras  = []
+
+    if version == "ERROR":
+        version = ""
+
+    if version:
+        if url:
+            ver_html = (f'<a href="{esc(url)}" class="version-link" '
+                        f'target="_blank">{esc(version)}</a>')
+        else:
+            ver_html = f'<span class="version-text">{esc(version)}</span>'
+    else:
+        ver_html = '<span class="version-empty">—</span>'
+
+    links_html = "".join(
+        f'<a href="{esc(a["url"])}" class="sub-link" target="_blank">{esc(a["name"])}</a>'
+        for a in extras
+    )
+
+    item_ci  = ci_status.get(item_key, {}) if show_ci else {}
+    ci_html  = ci_icon(env_name, item_ci)
+
+    return (
+        f'<td class="vc">'
+        f'<div class="cell-v">{ver_html}</div>'
+        + (f'<div class="cell-links">{links_html}</div>' if links_html else "")
+        + f'<div class="cell-meta">{ci_html}</div>'
+        f'</td>'
+    )
+
+
+# ─── CSS ─────────────────────────────────────────────────────────────────────
+
+CSS = """
+:root {
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --bg: #f1f5f9;
+  --surface: #fff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+  --col-p: 200px;
+  --col-t: 190px;
+  --bar-h: 52px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); font-size: 13px; background: var(--bg); color: var(--text); }
+
+/* ── top bar ── */
+.bar {
+  position: sticky; top: 0; z-index: 200;
+  height: var(--bar-h);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 20px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.4);
+}
+.bar-title { font-size: 15px; font-weight: 700; color: #f8fafc; letter-spacing: .02em; flex: 1; }
+.bar-tag {
+  font-size: 10px; font-weight: 700; background: #1e3a5f;
+  color: #60a5fa; padding: 3px 9px; border-radius: 4px;
+  letter-spacing: .08em; text-transform: uppercase;
+}
+.bar-ts { font-size: 11px; color: #475569; white-space: nowrap; }
+.bar-legend { display: flex; align-items: center; gap: 10px; margin-left: 12px; }
+.leg { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b; }
+.leg .ci-icon { pointer-events: none; }
+
+/* ── table wrapper ── */
+.wrap { overflow-x: auto; min-height: calc(100vh - var(--bar-h)); }
+table { border-collapse: collapse; width: max-content; min-width: 100%; background: var(--surface); }
+
+/* ── group-header row ── */
+.gh { height: 26px; }
+.gh th {
+  position: sticky; top: var(--bar-h); z-index: 90;
+  padding: 0 8px; text-align: center;
+  font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(255,255,255,.65); white-space: nowrap;
+}
+.gh .lbl  { background: #1e293b; color: #334155; }
+.gh .g-it { background: #1e3a8a; }
+.gh .g-ve { background: #3730a3; }
+.gh .g-ad { background: #0e7490; }
+.gh .g-pr { background: #92400e; }
+
+/* ── env-header row ── */
+.eh th {
+  position: sticky; top: calc(var(--bar-h) + 26px); z-index: 89;
+  padding: 6px 10px; text-align: center;
+  font-size: 11px; font-weight: 600; color: #e2e8f0;
+  border-right: 1px solid rgba(255,255,255,.07);
+  min-width: 160px;
+}
+.eh .lbl { background: #1e293b; text-align: left !important; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.eh .e-it { background: #1e3a8a; border-top: 2px solid #60a5fa; }
+.eh .e-ve { background: #312e81; border-top: 2px solid #818cf8; }
+.eh .e-ad { background: #155e75; border-top: 2px solid #22d3ee; }
+.eh .e-pr { background: #78350f; border-top: 2px solid #fbbf24; }
+.env-url  { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,.4); margin-top: 1px; }
+
+/* sticky first two cols in header */
+.gh .sl1, .eh .sl1 { position: sticky !important; left: 0; z-index: 95 !important; background: #1e293b !important; }
+.gh .sl2, .eh .sl2 { position: sticky !important; left: var(--col-p); z-index: 95 !important; background: #1e293b !important; }
+
+/* ── tbody rows ── */
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:hover td { background: #f0f9ff !important; }
+
+/* sticky label cells */
+td.lp, td.lt {
+  position: sticky; z-index: 10;
+  background: inherit; padding: 8px 10px; vertical-align: top;
+  border-right: 1px solid var(--border);
+}
+td.lp { left: 0; min-width: var(--col-p); max-width: var(--col-p); width: var(--col-p); }
+td.lt { left: var(--col-p); min-width: var(--col-t); max-width: var(--col-t); width: var(--col-t); }
+
+/* product row */
+tr.pr { background: #fff; }
+tr.pr td.lp { border-left: 3px solid #3b82f6; }
+.pname { font-weight: 700; color: #0f172a; font-size: 13px; line-height: 1.3; }
+.phead { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 3px; }
+.plinks { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; }
+.plink  { font-size: 10px; color: #64748b; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plink:hover { color: #2563eb; }
+.jira-lnk { font-size: 10px; color: #0052cc; text-decoration: none; margin-top: 3px; display: inline-block; }
+.jira-lnk:hover { text-decoration: underline; }
+
+/* template row */
+tr.tr { background: #f8fafc; }
+tr.tr td.lt { padding-left: 16px; color: #475569; font-size: 12px; }
+.tname { display: block; color: #475569; }
+
+/* update row */
+tr.ur { background: #f8fafc; }
+tr.ur td { font-size: 11px; color: var(--muted); padding: 6px 10px; font-style: italic; }
+
+/* ── version cells ── */
+td.vc { padding: 7px 10px; vertical-align: top; border-right: 1px solid var(--border); }
+
+.cell-v { margin-bottom: 2px; }
+.version-link  { font-weight: 600; color: #2563eb; text-decoration: none; font-size: 13px; }
+.version-link:hover { text-decoration: underline; }
+.version-text  { font-weight: 500; color: #334155; }
+.version-empty { color: #cbd5e1; user-select: none; }
+
+.cell-links { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 3px; }
+.sub-link {
+  font-size: 10px; color: #64748b; text-decoration: none;
+  background: #f1f5f9; border-radius: 3px; padding: 1px 5px;
+  white-space: nowrap;
+}
+.sub-link:hover { background: #e2e8f0; color: #1e293b; }
+
+.cell-meta { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+
+/* ── CI icons ── */
+.ci-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  font-size: 11px; font-weight: 700; line-height: 1;
+  text-decoration: none; flex-shrink: 0;
+  transition: transform .12s, opacity .12s;
+}
+a.ci-icon { cursor: pointer; }
+a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
+.ci-success  { background: #16a34a; color: #fff; }
+.ci-failed   { background: #dc2626; color: #fff; }
+.ci-running  { background: #d97706; color: #fff; animation: pulse 1.5s infinite; }
+.ci-canceled { background: #6b7280; color: #fff; }
+.ci-unknown  { background: #e2e8f0; color: #94a3b8; font-size: 13px; }
+
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.55 } }
+
+/* ── Bug badges ── */
+.bug-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 18px; border-radius: 9px;
+  font-size: 11px; font-weight: 700; color: #fff;
+  padding: 0 5px; cursor: pointer; user-select: none;
+  transition: transform .12s, opacity .12s;
+  flex-shrink: 0;
+}
+.bug-badge:hover { opacity: .85; transform: scale(1.1); }
+.bug-low  { background: #ca8a04; }
+.bug-mid  { background: #ea580c; }
+.bug-high { background: #dc2626; }
+
+/* ── Bug popup ── */
+#bug-popup {
+  display: none; position: fixed; z-index: 9999;
+  background: #1e293b; color: #e2e8f0;
+  border-radius: 10px; padding: 14px 16px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06);
+  min-width: 500px; max-width: 680px;
+  max-height: 440px; overflow-y: auto;
+}
+#bug-popup::-webkit-scrollbar { width: 5px; }
+#bug-popup::-webkit-scrollbar-track { background: #0f172a; }
+#bug-popup::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+#bug-popup h4 {
+  font-size: 11px; font-weight: 700; color: #64748b;
+  text-transform: uppercase; letter-spacing: .09em;
+  margin-bottom: 10px; padding-bottom: 8px;
+  border-bottom: 1px solid #334155;
+}
+.bp-header {
+  display: grid; grid-template-columns: 95px 1fr 95px 140px;
+  gap: 8px; font-size: 9px; font-weight: 700; color: #334155;
+  text-transform: uppercase; letter-spacing: .07em;
+  margin-bottom: 6px; padding-bottom: 4px;
+}
+.bt {
+  display: grid; grid-template-columns: 95px 1fr 95px 140px;
+  gap: 8px; padding: 6px 0; border-top: 1px solid #1e3a5f20;
+  align-items: start;
+}
+.bt:first-of-type { border-top-color: #334155; }
+.bt-key a  { color: #60a5fa; text-decoration: none; font-weight: 700; font-size: 11px; }
+.bt-key a:hover { text-decoration: underline; color: #93c5fd; }
+.bt-sum    { color: #cbd5e1; font-size: 11px; line-height: 1.4;
+             overflow: hidden; display: -webkit-box;
+             -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.bt-sta    { text-align: center; }
+.s-pill    { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+.s-open     { background: #0f172a; color: #64748b; border: 1px solid #334155; }
+.s-progress { background: #1e3a8a; color: #93c5fd; }
+.s-review   { background: #312e81; color: #a5b4fc; }
+.bt-asgn   { color: #64748b; font-size: 10px; line-height: 1.4; }
+"""
+
+
+# ─── JavaScript ───────────────────────────────────────────────────────────────
+
+JS = r"""
+(function () {
+  'use strict';
+  var popup = document.getElementById('bug-popup');
+  var hideTimer;
+
+  function htmlEsc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showPopup(badge) {
+    clearTimeout(hideTimer);
+    var bugs    = JSON.parse(badge.dataset.bugs);
+    var product = badge.dataset.product || '';
+
+    var h = '<h4>' + htmlEsc(product) + ' &mdash; Open QA Bugs (' + bugs.length + ')</h4>';
+    h += '<div class="bp-header"><span>Ticket</span><span>Summary</span><span>Status</span><span>Assignee</span></div>';
+
+    bugs.forEach(function (b) {
+      var scls = /progress/i.test(b.status) ? 's-progress'
+               : /review/i.test(b.status)   ? 's-review'
+               : 's-open';
+      h += '<div class="bt">'
+         + '<div class="bt-key"><a href="' + htmlEsc(b.url) + '" target="_blank">' + htmlEsc(b.key) + '</a></div>'
+         + '<div class="bt-sum">' + htmlEsc(b.summary) + '</div>'
+         + '<div class="bt-sta"><span class="s-pill ' + scls + '">' + htmlEsc(b.status) + '</span></div>'
+         + '<div class="bt-asgn">' + htmlEsc(b.assignee) + '</div>'
+         + '</div>';
+    });
+
+    popup.innerHTML = h;
+
+    /* smart positioning: try right of badge, fall back to left */
+    var W  = 580, H = Math.min(440, 90 + bugs.length * 46);
+    var rc = badge.getBoundingClientRect();
+    var left = rc.right + 12;
+    var top  = rc.top - 4;
+
+    if (left + W > window.innerWidth  - 8) { left = rc.left - W - 12; }
+    if (top  + H > window.innerHeight - 8) { top  = window.innerHeight - H - 8; }
+    if (left < 8) left = 8;
+    if (top  < 52) top = 52;   /* don't overlap top bar */
+
+    popup.style.left    = left + 'px';
+    popup.style.top     = top  + 'px';
+    popup.style.display = 'block';
+  }
+
+  function hidePopup() {
+    hideTimer = setTimeout(function () { popup.style.display = 'none'; }, 160);
+  }
+
+  document.querySelectorAll('.bug-badge').forEach(function (b) {
+    b.addEventListener('mouseenter', function () { showPopup(b); });
+    b.addEventListener('mouseleave', hidePopup);
+  });
+  popup.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
+  popup.addEventListener('mouseleave', hidePopup);
+})();
+"""
+
+
+# ─── Page assembly ────────────────────────────────────────────────────────────
+
+GROUP_CLASSES = {
+    "infratest": ("g-it", "e-it"),
+    "ve":        ("g-ve", "e-ve"),
+    "appdev":    ("g-ad", "e-ad"),
+    "prod":      ("g-pr", "e-pr"),
+}
+
+
+def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict) -> str:
+    envs      = config["environments"]
+    products  = config["products"]
+    jira_base = config.get("jira_base_url", "").rstrip("/")
+    generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    # Compute group column spans for the header
+    groups: list[dict] = []
+    for env in envs:
+        g   = env.get("group", "infratest")
+        lbl = env.get("group_label", g.upper())
+        cls = GROUP_CLASSES.get(g, ("g-it", "e-it"))[0]
+        if groups and groups[-1]["label"] == lbl:
+            groups[-1]["span"] += 1
+        else:
+            groups.append({"label": lbl, "cls": cls, "span": 1})
+
+    p: list[str] = []
+    p.append('<!DOCTYPE html>')
+    p.append('<html lang="en">')
+    p.append('<head>')
+    p.append('<meta charset="UTF-8">')
+    p.append('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
+    p.append('<title>ICE Infrastructure Dashboard</title>')
+    p.append(f'<style>{CSS}</style>')
+    p.append('</head>')
+    p.append('<body>')
+
+    # ── Top bar ────────────────────────────────────────────────────────────
+    p.append(
+        f'<div class="bar">'
+        f'<span class="bar-title">ICE Infrastructure Dashboard</span>'
+        f'<div class="bar-legend">'
+        f'<span class="leg"><span class="ci-icon ci-success">✓</span> CI pass</span>'
+        f'<span class="leg"><span class="ci-icon ci-failed">✗</span> CI fail</span>'
+        f'<span class="leg"><span class="ci-icon ci-running">●</span> running</span>'
+        f'<span class="leg"><span class="ci-icon ci-unknown">–</span> not configured</span>'
+        f'<span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span>'
+        f'</div>'
+        f'<span class="bar-tag">EDP</span>'
+        f'<span class="bar-ts">Generated {generated}</span>'
+        f'</div>'
+    )
+
+    p.append('<div class="wrap"><table>')
+    p.append('<thead>')
+
+    # ── Group header row ───────────────────────────────────────────────────
+    p.append('<tr class="gh">')
+    p.append('<th class="lbl sl1"></th><th class="lbl sl2"></th>')
+    for g in groups:
+        p.append(f'<th class="{g["cls"]}" colspan="{g["span"]}">{esc(g["label"])}</th>')
+    p.append('</tr>')
+
+    # ── Env detail header row ──────────────────────────────────────────────
+    p.append('<tr class="eh">')
+    p.append('<th class="lbl sl1">Product</th>')
+    p.append('<th class="lbl sl2">Workflow Template</th>')
+    for env in envs:
+        g   = env.get("group", "infratest")
+        cls = GROUP_CLASSES.get(g, ("g-it", "e-it"))[1]
+        p.append(
+            f'<th class="{cls}">{esc(env["name"])}'
+            f'<span class="env-url">{esc(env.get("url", ""))}</span></th>'
+        )
+    p.append('</tr>')
+    p.append('</thead>')
+
+    # ── Table body ─────────────────────────────────────────────────────────
+    p.append('<tbody>')
+
+    # Last-update row
+    p.append('<tr class="ur"><td class="lp">Last Update</td><td class="lt"></td>')
+    for env in envs:
+        val = versions.get(env["name"], {}).get("update_time", "")
+        p.append(f'<td class="vc">{esc(val)}</td>')
+    p.append('</tr>')
+
+    # Product rows
+    for product in products:
+        key       = product["key"]
+        name      = product["name"]
+        jproj     = product.get("jira_project", "")
+        add_urls  = product.get("additional_urls", [])
+        templates = product.get("templates", [])
+        tickets   = jira_bugs.get(key, [])
+
+        # Build product label cell
+        plinks_html = "".join(
+            f'<a href="{esc(a["url"])}" class="plink" target="_blank">{esc(a["name"])}</a>'
+            for a in add_urls
+        )
+        jira_html = ""
+        if jproj and jproj != "CONFIGURE_ME":
+            jira_html = (
+                f'<a href="{esc(jira_base)}/projects/{esc(jproj)}" '
+                f'class="jira-lnk" target="_blank">JIRA: {esc(jproj)}</a>'
+            )
+        badge_html = bug_badge(tickets, name)
+
+        label_cell = (
+            f'<td class="lp">'
+            f'<div class="phead"><span class="pname">{esc(name)}</span>{badge_html}</div>'
+            + (f'<div class="plinks">{plinks_html}</div>' if plinks_html else "")
+            + jira_html
+            + f'</td>'
+        )
+
+        p.append(f'<tr class="pr">{label_cell}<td class="lt"></td>')
+        for env in envs:
+            p.append(version_cell(env["name"], key, versions, ci_status))
+        p.append('</tr>')
+
+        # Template rows
+        for tpl in templates:
+            tkey   = tpl["key"]
+            tname  = tpl["name"]
+            tlinks = "".join(
+                f'<a href="{esc(a["url"])}" class="plink" target="_blank">{esc(a["name"])}</a>'
+                for a in tpl.get("additional_urls", [])
+            )
+            tlabel = (
+                f'<td class="lt">'
+                f'<span class="tname">{esc(tname)}</span>'
+                + (f'<div class="plinks">{tlinks}</div>' if tlinks else "")
+                + f'</td>'
+            )
+            p.append(f'<tr class="tr"><td class="lp"></td>{tlabel}')
+            for env in envs:
+                p.append(version_cell(env["name"], tkey, versions, ci_status))
+            p.append('</tr>')
+
+    p.append('</tbody>')
+    p.append('</table></div>')
+
+    # Bug popup container (populated by JS on hover)
+    p.append('<div id="bug-popup"></div>')
+    p.append(f'<script>{JS}</script>')
+    p.append('</body></html>')
+
+    return "\n".join(p)
+
+
+# ─── Main ────────────────────────────────────────────────────────────────────
+
+def main() -> None:
+    print("Loading config...")
+    config = load_config()
+    print("Loading versions...")
+    versions = load_versions(config)
+    print("Fetching CI status...")
+    ci_data = fetch_ci_status(config)
+    print("Fetching JIRA bugs...")
+    jira_data = fetch_jira_bugs(config)
+    print("Generating HTML...")
+    html = generate_html(config, versions, ci_data, jira_data)
+    Path("public").mkdir(exist_ok=True)
+    out = Path("public/index.html")
+    out.write_text(html, encoding="utf-8")
+    size_kb = out.stat().st_size // 1024
+    print(f"  public/index.html written ({size_kb} KB)")
+
+
+if __name__ == "__main__":
+    main()
