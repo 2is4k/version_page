@@ -292,6 +292,7 @@ body { font-family: var(--font); font-size: 13px; background: var(--bg); color: 
 /* ── table wrapper ── */
 .wrap { overflow-x: auto; min-height: calc(100vh - var(--bar-h)); }
 table { border-collapse: collapse; width: max-content; min-width: 100%; background: var(--surface); }
+thead { border-bottom: 3px solid #475569; }
 
 /* ── group-header row ── */
 .gh { height: 26px; }
@@ -313,9 +314,6 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
   padding: 6px 8px; text-align: center;
   font-size: 11px; font-weight: 600; color: #e2e8f0;
   border-right: 1px solid rgba(255,255,255,.07);
-  /* box-shadow for the header/body separator — border-bottom is unreliable
-     on sticky cells inside border-collapse tables */
-  box-shadow: 0 4px 0 0 #fff;
   width: 1px;           /* shrink to content; table-layout:auto does the rest */
   white-space: nowrap;
 }
