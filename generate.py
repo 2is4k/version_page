@@ -449,10 +449,10 @@ tr.ur td { font-size: 11px; color: var(--muted); padding: 6px 10px; font-style: 
 td.ur-label { padding: 6px 10px; font-size: 11px; color: var(--muted); font-style: italic; font-weight: 600; }
 
 /* ── version cells ── */
-td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--border); white-space: nowrap; width: 1px; }
+td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--border); white-space: nowrap; width: 1px; background: #fff; }
 
 .cell-v { margin-bottom: 2px; }
-.version-link  { font-weight: 700; color: #2563eb; text-decoration: none; font-size: 15px; }
+.version-link  { font-weight: 700; color: #0000EE; text-decoration: none; font-size: 15px; }
 .version-link:hover { text-decoration: underline; }
 .version-text  { font-weight: 500; color: #334155; }
 .version-empty { color: #cbd5e1; user-select: none; }
@@ -466,11 +466,10 @@ td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--bor
 
 .cell-links { display: flex; flex-direction: column; gap: 2px; margin-bottom: 3px; }
 .sub-link {
-  font-size: 10px; color: #64748b; text-decoration: none;
-  background: #f1f5f9; border-radius: 3px; padding: 1px 5px;
+  font-size: 10px; color: #0000EE; text-decoration: none;
   white-space: nowrap;
 }
-.sub-link:hover { background: #e2e8f0; color: #1e293b; }
+.sub-link:hover { text-decoration: underline; }
 
 .cell-meta { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
 
