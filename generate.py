@@ -380,13 +380,10 @@ tr.tr { background: #f8fafc; }
 tr.tr td.lt { padding-left: 16px; color: #475569; font-size: 12px; }
 .tname { display: block; color: #475569; }
 
-/* update row — first real data row, clearly separated from header */
-tr.ur { background: #fff; }
+/* update row — last row of the table */
+tr.ur { background: #f8fafc; border-top: 2px solid var(--border); }
 tr.ur td { font-size: 11px; color: var(--muted); padding: 6px 10px; font-style: italic; }
-/* strip the frame styling inherited from td.lp / td.lt so this row
-   doesn't visually merge with the header */
-tr.ur td.lp { border-left: none; }
-tr.ur td.lt { box-shadow: none; }
+td.ur-label { padding: 6px 10px; font-size: 11px; color: var(--muted); font-style: italic; font-weight: 600; }
 
 /* ── version cells ── */
 td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--border); white-space: nowrap; width: 1px; }
@@ -632,13 +629,6 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
     # ── Table body ─────────────────────────────────────────────────────────
     p.append('<tbody>')
 
-    # Last-update row
-    p.append('<tr class="ur"><td class="lp">Last Update</td><td class="lt"></td>')
-    for env in envs:
-        val = versions.get(env["name"], {}).get("update_time", "")
-        p.append(f'<td class="vc">{esc(val)}</td>')
-    p.append('</tr>')
-
     # Product rows
     for product in products:
         key       = product["key"]
@@ -692,6 +682,13 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
             for env in envs:
                 p.append(version_cell(env["name"], tkey, versions, ci_status, show_ci=False))
             p.append('</tr>')
+
+    # Last-update row — last row of the table
+    p.append('<tr class="ur"><td class="ur-label">Last Update</td><td></td>')
+    for env in envs:
+        val = versions.get(env["name"], {}).get("update_time", "")
+        p.append(f'<td class="vc">{esc(val)}</td>')
+    p.append('</tr>')
 
     p.append('</tbody>')
     p.append('</table></div>')
