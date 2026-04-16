@@ -313,7 +313,9 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
   padding: 6px 8px; text-align: center;
   font-size: 11px; font-weight: 600; color: #e2e8f0;
   border-right: 1px solid rgba(255,255,255,.07);
-  border-bottom: 3px solid #475569;   /* clear thead/tbody separator */
+  /* box-shadow for the header/body separator — border-bottom is unreliable
+     on sticky cells inside border-collapse tables */
+  box-shadow: 0 4px 0 0 #fff;
   width: 1px;           /* shrink to content; table-layout:auto does the rest */
   white-space: nowrap;
 }
@@ -378,9 +380,13 @@ tr.tr { background: #f8fafc; }
 tr.tr td.lt { padding-left: 16px; color: #475569; font-size: 12px; }
 .tname { display: block; color: #475569; }
 
-/* update row */
-tr.ur { background: #f8fafc; }
+/* update row — first real data row, clearly separated from header */
+tr.ur { background: #fff; }
 tr.ur td { font-size: 11px; color: var(--muted); padding: 6px 10px; font-style: italic; }
+/* strip the frame styling inherited from td.lp / td.lt so this row
+   doesn't visually merge with the header */
+tr.ur td.lp { border-left: none; }
+tr.ur td.lt { box-shadow: none; }
 
 /* ── version cells ── */
 td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--border); white-space: nowrap; width: 1px; }
