@@ -313,6 +313,7 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
   padding: 6px 8px; text-align: center;
   font-size: 11px; font-weight: 600; color: #e2e8f0;
   border-right: 1px solid rgba(255,255,255,.07);
+  border-bottom: 3px solid #475569;   /* clear thead/tbody separator */
   width: 1px;           /* shrink to content; table-layout:auto does the rest */
   white-space: nowrap;
 }
@@ -324,22 +325,42 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
 .env-name { display: block; }
 .env-url  { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,.4); margin-top: 2px; white-space: nowrap; }
 
-/* sticky first two cols in header */
-.gh .sl1, .eh .sl1 { position: sticky !important; left: 0; z-index: 95 !important; background: #1e293b !important; border-right: 2px solid #000 !important; }
-.gh .sl2, .eh .sl2 { position: sticky !important; left: var(--col-p); z-index: 95 !important; background: #1e293b !important; border-right: 2px solid #000 !important; }
+/* sticky first two cols in header — outer frame only, no divider between them */
+.gh .sl1, .eh .sl1 {
+  position: sticky !important; left: 0; z-index: 95 !important;
+  background: #1e293b !important;
+  border-left:  2px solid #0f172a !important;
+  border-right: none !important;
+}
+.gh .sl2, .eh .sl2 {
+  position: sticky !important; left: var(--col-p); z-index: 95 !important;
+  background: #1e293b !important;
+  border-right: none !important;
+  /* box-shadow travels with the sticky element, acting as a fixed right border */
+  box-shadow: 3px 0 0 0 #0f172a;
+}
 
 /* ── tbody rows ── */
 tbody tr { border-bottom: 1px solid var(--border); }
 tbody tr:hover td { background: #f0f9ff !important; }
 
-/* sticky label cells */
+/* sticky label cells — outer frame only, no divider between them */
 td.lp, td.lt {
   position: sticky; z-index: 10;
   background: inherit; padding: 8px 10px; vertical-align: top;
-  border-right: 2px solid #000;
 }
-td.lp { left: 0; min-width: var(--col-p); max-width: var(--col-p); width: var(--col-p); }
-td.lt { left: var(--col-p); min-width: var(--col-t); max-width: var(--col-t); width: var(--col-t); border-right: 2px solid #000; }
+td.lp {
+  left: 0; min-width: var(--col-p); max-width: var(--col-p); width: var(--col-p);
+  border-left:  2px solid #0f172a;
+  border-right: none;
+}
+td.lt {
+  left: var(--col-p); min-width: var(--col-t); max-width: var(--col-t); width: var(--col-t);
+  border-left:  none;
+  border-right: none;
+  /* box-shadow travels with the sticky element — visible right border when scrolling */
+  box-shadow: 3px 0 0 0 #0f172a;
+}
 
 /* product row */
 tr.pr { background: #fff; }
