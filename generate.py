@@ -302,8 +302,12 @@ def version_cell(
         for a in extras
     )
 
-    item_ci  = ci_status.get(item_key, {}) if show_ci else {}
-    ci_html  = passrate_badge(env_name, item_ci)
+    item_ci = ci_status.get(item_key, {}) if show_ci else {}
+    if show_ci and not version:
+        # No version deployed → passrate is meaningless, force gray '-'
+        ci_html = '<span class="pr-badge pr-none" title="No version deployed">-</span>'
+    else:
+        ci_html = passrate_badge(env_name, item_ci)
 
     return (
         f'<td class="vc">'
