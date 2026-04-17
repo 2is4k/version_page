@@ -249,14 +249,13 @@ def passrate_badge(env_name: str, item_ci: dict) -> str:
 
 
 def bug_badge(tickets: list, product_name: str) -> str:
-    n = len(tickets)
-    if not n:
-        return ""
-    lvl     = "bug-low" if n <= 2 else "bug-mid" if n <= 5 else "bug-high"
+    n       = len(tickets)
+    cls     = "bug-zero" if n == 0 else "bug-nonzero"
     bugs_js = esc(json.dumps(tickets))
+    title   = "No open QA bugs" if n == 0 else f"{n} open QA bug(s) — hover for details"
     return (
-        f'<span class="bug-badge {lvl}" data-bugs="{bugs_js}" '
-        f'data-product="{esc(product_name)}" title="{n} open QA bug(s) — hover for details">'
+        f'<span class="bug-badge {cls}" data-bugs="{bugs_js}" '
+        f'data-product="{esc(product_name)}" title="{title}">'
         f'{n}</span>'
     )
 
@@ -495,9 +494,8 @@ a.pr-badge:hover { opacity: .8; transform: scale(1.1); }
   flex-shrink: 0;
 }
 .bug-badge:hover { opacity: .85; transform: scale(1.1); }
-.bug-low  { background: #ca8a04; }
-.bug-mid  { background: #ea580c; }
-.bug-high { background: #dc2626; }
+.bug-zero    { background: #94a3b8; }   /* gray — no open bugs */
+.bug-nonzero { background: #0f172a; }   /* black — bugs present */
 
 /* ── Bug popup ── */
 #bug-popup {
@@ -615,7 +613,7 @@ JS = r"""
     hideTimer = setTimeout(function () { popup.style.display = 'none'; }, 160);
   }
 
-  document.querySelectorAll('.bug-badge').forEach(function (b) {
+  document.querySelectorAll('.bug-badge.bug-nonzero').forEach(function (b) {
     b.addEventListener('mouseenter', function () { showPopup(b); });
     b.addEventListener('mouseleave', hidePopup);
   });
@@ -671,7 +669,8 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
         f'<span class="leg"><span class="pr-badge pr-green" style="pointer-events:none">95</span> ≥90% pass</span>'
         f'<span class="leg"><span class="pr-badge pr-yellow" style="pointer-events:none">75</span> 61-89%</span>'
         f'<span class="leg"><span class="pr-badge pr-red" style="pointer-events:none">42</span> ≤60%</span>'
-        f'<span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span>'
+        f'<span class="leg"><span class="bug-badge bug-nonzero" style="pointer-events:none">3</span> QA bugs</span>'
+        f'<span class="leg"><span class="bug-badge bug-zero" style="pointer-events:none">0</span> none</span>'
         f'</div>'
         f'<span class="bar-tag">EDP</span>'
         f'<span class="bar-ts">Generated {generated}</span>'
