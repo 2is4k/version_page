@@ -233,19 +233,19 @@ def esc(s: Any) -> str:
 
 
 def passrate_badge(env_name: str, item_ci: dict) -> str:
-    """Render a coloured circle showing the CI passrate % (0-100) from ci_config."""
+    """Render a coloured pill showing the CI passrate % (0-100) from ci_config.
+    Shows a gray '-' pill when the environment is not configured."""
     info = item_ci.get(env_name) if item_ci else None
     if not info or "passrate" not in info:
-        return ""
+        return '<span class="pr-badge pr-none" title="CI not configured for this environment">-</span>'
     pct  = int(info["passrate"])
     url  = info.get("pipeline_url", "")
     cls  = "pr-green" if pct >= 90 else ("pr-yellow" if pct >= 61 else "pr-red")
-    lbl  = str(pct)
     tip  = f"CI passrate: {pct}%"
     if url:
         return (f'<a href="{esc(url)}" class="pr-badge {cls}" '
-                f'title="{esc(tip)}" target="_blank">{lbl}</a>')
-    return f'<span class="pr-badge {cls}" title="{esc(tip)}">{lbl}</span>'
+                f'title="{esc(tip)}" target="_blank">{pct}</a>')
+    return f'<span class="pr-badge {cls}" title="{esc(tip)}">{pct}</span>'
 
 
 def bug_badge(tickets: list, product_name: str) -> str:
@@ -480,9 +480,10 @@ td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--bor
 }
 a.pr-badge { cursor: pointer; }
 a.pr-badge:hover { opacity: .8; transform: scale(1.1); }
-.pr-green  { background: #16a34a; }   /* 90-100 */
-.pr-yellow { background: #d97706; }   /* 61-89  */
-.pr-red    { background: #dc2626; }   /* 0-60   */
+.pr-green  { background: #16a34a; }   /* 90-100          */
+.pr-yellow { background: #d97706; }   /* 61-89           */
+.pr-red    { background: #dc2626; }   /* 0-60            */
+.pr-none   { background: #94a3b8; color: #fff; }   /* not configured  */
 
 /* ── Bug badges ── */
 .bug-badge {
