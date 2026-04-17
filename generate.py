@@ -234,14 +234,17 @@ def esc(s: Any) -> str:
 
 def passrate_badge(env_name: str, item_ci: dict) -> str:
     """Render a coloured pill showing the CI passrate % (0-100) from ci_config.
-    Shows a gray '-' pill when the environment is not configured."""
+    passrate can be an int (0-100) or the string '-' meaning no CI for this env."""
     info = item_ci.get(env_name) if item_ci else None
     if not info or "passrate" not in info:
+        return ""
+    raw = info["passrate"]
+    url = info.get("pipeline_url", "")
+    if str(raw) == "-":
         return '<span class="pr-badge pr-none" title="CI not configured for this environment">-</span>'
-    pct  = int(info["passrate"])
-    url  = info.get("pipeline_url", "")
-    cls  = "pr-green" if pct >= 90 else ("pr-yellow" if pct >= 61 else "pr-red")
-    tip  = f"CI passrate: {pct}%"
+    pct = int(raw)
+    cls = "pr-green" if pct >= 90 else ("pr-yellow" if pct >= 61 else "pr-red")
+    tip = f"CI passrate: {pct}%"
     if url:
         return (f'<a href="{esc(url)}" class="pr-badge {cls}" '
                 f'title="{esc(tip)}" target="_blank">{pct}</a>')

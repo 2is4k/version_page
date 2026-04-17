@@ -410,7 +410,11 @@
     "ipam": {
       "InfraTestDev":          { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7001" },
       "InfraTestTest":         { "passrate": 98,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7002" },
-      "InfraTestIntegration":  { "passrate": 96,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7003" }
+      "InfraTestIntegration":  { "passrate": 96,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7003" },
+      "VE":                    { "passrate": "-" },
+      "AppDevTest":            { "passrate": "-" },
+      "ProdBelgium":           { "passrate": "-" },
+      "ProdGermany":           { "passrate": "-" }
     },
     "object_storage": {
       "InfraTestDev":          { "passrate": 98,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8001" },
@@ -422,7 +426,13 @@
       "ProdGermany":           { "passrate": 82,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8007" }
     },
     "workspace_base_service": {
-      "InfraTestDev":          { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/workspace-service-tests/-/pipelines/9001" }
+      "InfraTestDev":          { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/workspace-service-tests/-/pipelines/9001" },
+      "InfraTestTest":         { "passrate": "-" },
+      "InfraTestIntegration":  { "passrate": "-" },
+      "VE":                    { "passrate": "-" },
+      "AppDevTest":            { "passrate": "-" },
+      "ProdBelgium":           { "passrate": "-" },
+      "ProdGermany":           { "passrate": "-" }
     }
   },
 
