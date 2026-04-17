@@ -343,86 +343,86 @@
     }
   ],
 
-  "dummy_ci_status": {
+  "ci_config": {
     "ice_client_access": {
-      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2101" },
-      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2102" },
-      "InfraTestIntegration":  { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2103" },
-      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2104" },
-      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2105" },
-      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2106" },
-      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2107" }
+      "InfraTestDev":          { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2101" },
+      "InfraTestTest":         { "passrate": 97,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2102" },
+      "InfraTestIntegration":  { "passrate": 94,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2103" },
+      "VE":                    { "passrate": 91,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2104" },
+      "AppDevTest":            { "passrate": 88,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2105" },
+      "ProdBelgium":           { "passrate": 85,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2106" },
+      "ProdGermany":           { "passrate": 83,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2107" }
     },
     "create_rule_panorama": {
-      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2201" },
-      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2202" },
-      "InfraTestIntegration":  { "status": "failed",  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2203" },
-      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2204" },
-      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2205" },
-      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2206" },
-      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2207" }
+      "InfraTestDev":          { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2201" },
+      "InfraTestTest":         { "passrate": 98,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2202" },
+      "InfraTestIntegration":  { "passrate": 72,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2203" },
+      "VE":                    { "passrate": 65,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2204" },
+      "AppDevTest":            { "passrate": 48,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2205" },
+      "ProdBelgium":           { "passrate": 41,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2206" },
+      "ProdGermany":           { "passrate": 38,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2207" }
     },
     "ice_core": {
-      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1001" },
-      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1002" },
-      "InfraTestIntegration":  { "status": "failed",  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1003" },
-      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1004" },
-      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1005" },
-      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1006" },
-      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1007" }
+      "InfraTestDev":          { "passrate": 98,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1001" },
+      "InfraTestTest":         { "passrate": 96,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1002" },
+      "InfraTestIntegration":  { "passrate": 90,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1003" },
+      "VE":                    { "passrate": 78,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1004" },
+      "AppDevTest":            { "passrate": 55,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1005" },
+      "ProdBelgium":           { "passrate": 42,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1006" },
+      "ProdGermany":           { "passrate": 39,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-tests/-/pipelines/1007" }
     },
     "create_l3_zone_apstra": {
-      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3001" },
-      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3002" },
-      "InfraTestIntegration":  { "status": "failed",  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3003" },
-      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3004" },
-      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3005" },
-      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3006" },
-      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3007" }
+      "InfraTestDev":          { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3001" },
+      "InfraTestTest":         { "passrate": 98,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3002" },
+      "InfraTestIntegration":  { "passrate": 91,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3003" },
+      "VE":                    { "passrate": 88,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3004" },
+      "AppDevTest":            { "passrate": 75,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3005" },
+      "ProdBelgium":           { "passrate": 62,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3006" },
+      "ProdGermany":           { "passrate": 58,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/iceflow/edp_l3zone_apstra/-/pipelines/3007" }
     },
     "ice_flow": {
-      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4001" },
-      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4002" },
-      "InfraTestIntegration":  { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4003" },
-      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4004" },
-      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4005" },
-      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4006" },
-      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4007" }
+      "InfraTestDev":          { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4001" },
+      "InfraTestTest":         { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4002" },
+      "InfraTestIntegration":  { "passrate": 98,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4003" },
+      "VE":                    { "passrate": 95,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4004" },
+      "AppDevTest":            { "passrate": 93,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4005" },
+      "ProdBelgium":           { "passrate": 91,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4006" },
+      "ProdGermany":           { "passrate": 90,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-tests/-/pipelines/4007" }
     },
     "workspace_ice_fow": {
-      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5001" },
-      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5002" },
-      "InfraTestIntegration":  { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5003" },
-      "VE":                    { "status": "failed",  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5004" },
-      "AppDevTest":            { "status": "running", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5005" },
-      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5006" },
-      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5007" }
+      "InfraTestDev":          { "passrate": 95,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5001" },
+      "InfraTestTest":         { "passrate": 90,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5002" },
+      "InfraTestIntegration":  { "passrate": 82,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5003" },
+      "VE":                    { "passrate": 53,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5004" },
+      "AppDevTest":            { "passrate": 27,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5005" },
+      "ProdBelgium":           { "passrate": 88,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5006" },
+      "ProdGermany":           { "passrate": 85,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-flow-workspace-tests/-/pipelines/5007" }
     },
     "ice_scape": {
-      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6001" },
-      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6002" },
-      "InfraTestIntegration":  { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6003" },
-      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6004" },
-      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6005" },
-      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6006" },
-      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6007" }
+      "InfraTestDev":          { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6001" },
+      "InfraTestTest":         { "passrate": 98,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6002" },
+      "InfraTestIntegration":  { "passrate": 96,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6003" },
+      "VE":                    { "passrate": 94,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6004" },
+      "AppDevTest":            { "passrate": 91,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6005" },
+      "ProdBelgium":           { "passrate": 90,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6006" },
+      "ProdGermany":           { "passrate": 90,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/capabilities/watch-tower-tests/-/pipelines/6007" }
     },
     "ipam": {
-      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7001" },
-      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7002" },
-      "InfraTestIntegration":  { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7003" }
+      "InfraTestDev":          { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7001" },
+      "InfraTestTest":         { "passrate": 98,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7002" },
+      "InfraTestIntegration":  { "passrate": 96,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ipam-tests/-/pipelines/7003" }
     },
     "object_storage": {
-      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8001" },
-      "InfraTestTest":         { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8002" },
-      "InfraTestIntegration":  { "status": "failed",  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8003" },
-      "VE":                    { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8004" },
-      "AppDevTest":            { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8005" },
-      "ProdBelgium":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8006" },
-      "ProdGermany":           { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8007" }
+      "InfraTestDev":          { "passrate": 98,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8001" },
+      "InfraTestTest":         { "passrate": 95,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8002" },
+      "InfraTestIntegration":  { "passrate": 48,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8003" },
+      "VE":                    { "passrate": 91,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8004" },
+      "AppDevTest":            { "passrate": 88,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8005" },
+      "ProdBelgium":           { "passrate": 85,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8006" },
+      "ProdGermany":           { "passrate": 82,  "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-object-storage-tests/-/pipelines/8007" }
     },
     "workspace_base_service": {
-      "InfraTestDev":          { "status": "success", "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/workspace-service-tests/-/pipelines/9001" }
+      "InfraTestDev":          { "passrate": 100, "pipeline_url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/workspace-service-tests/-/pipelines/9001" }
     }
   },
 

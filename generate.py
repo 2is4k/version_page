@@ -59,19 +59,25 @@ def _get(url: str, headers: dict) -> Optional[Any]:
 # ─── CI Status Fetcher ────────────────────────────────────────────────────────
 
 def fetch_ci_status(config: dict) -> dict:
-    """Returns {item_key: {env_name: {status, pipeline_url}}}"""
+    """Returns {item_key: {env_name: {passrate, pipeline_url}}}
+    passrate is always read from ci_config (manually maintained in config.json).
+    In live mode, pipeline_url is updated from the GitLab API.
+    """
+    # Base: passrate + fallback pipeline_url always come from config
+    ci_cfg = config.get("ci_config", {})
+    result: dict = {k: dict(v) for k, v in ci_cfg.items()}
 
     if FORCE_DUMMY or not os.environ.get("GITLAB_TOKEN"):
         if not FORCE_DUMMY:
-            print("  GITLAB_TOKEN not set → using dummy CI data")
-        return config.get("dummy_ci_status", {})
+            print("  GITLAB_TOKEN not set → using ci_config pipeline URLs")
+        return result
 
+    # Live mode: fetch live pipeline_url from GitLab, keep passrate from config
     token   = os.environ["GITLAB_TOKEN"]
     base    = config["gitlab_base_url"].rstrip("/")
     headers = {"PRIVATE-TOKEN": token}
-    result: dict = {}
 
-    def _fetch(key: str, project_id: Any, project_url: str, env_map: dict) -> dict:
+    def _fetch_urls(project_id: Any, project_url: str, env_map: dict) -> dict:
         if not project_id or str(project_id) == "CONFIGURE_ME":
             return {}
         enc  = urllib.parse.quote(str(project_id), safe="")
@@ -84,27 +90,29 @@ def fetch_ci_status(config: dict) -> dict:
             if not env_name:
                 continue
             lp = sched.get("last_pipeline") or {}
-            out[env_name] = {
-                "status":       lp.get("status", "unknown"),
-                "pipeline_url": lp.get("web_url", project_url + "/-/pipelines"),
-            }
+            out[env_name] = lp.get("web_url", project_url + "/-/pipelines")
         return out
 
     for product in config["products"]:
-        key = product["key"]
-        print(f"  CI: {key}")
-        result[key] = _fetch(
-            key, product.get("ci_project_id"),
+        key  = product["key"]
+        urls = _fetch_urls(
+            product.get("ci_project_id"),
             product.get("ci_project_url", ""),
             product.get("pipeline_env_mapping", {}),
         )
+        for env_name, url in urls.items():
+            if key in result and env_name in result[key]:
+                result[key][env_name]["pipeline_url"] = url
         for tpl in product.get("templates", []):
-            tkey = tpl["key"]
-            result[tkey] = _fetch(
-                tkey, tpl.get("ci_project_id"),
+            tkey  = tpl["key"]
+            turls = _fetch_urls(
+                tpl.get("ci_project_id"),
                 tpl.get("ci_project_url", ""),
                 tpl.get("pipeline_env_mapping", {}),
             )
+            for env_name, url in turls.items():
+                if tkey in result and env_name in result[tkey]:
+                    result[tkey][env_name]["pipeline_url"] = url
 
     return result
 
@@ -224,27 +232,20 @@ def esc(s: Any) -> str:
             .replace("'", "&#39;"))
 
 
-CI_MAP = {
-    "success":  ("ci-success",  "✓", "CI: passed"),
-    "failed":   ("ci-failed",   "✗", "CI: failed"),
-    "running":  ("ci-running",  "●", "CI: running"),
-    "pending":  ("ci-running",  "●", "CI: pending"),
-    "canceled": ("ci-canceled", "○", "CI: canceled"),
-    "skipped":  ("ci-canceled", "○", "CI: skipped"),
-}
-
-
-def ci_icon(env_name: str, item_ci: dict) -> str:
+def passrate_badge(env_name: str, item_ci: dict) -> str:
+    """Render a coloured circle showing the CI passrate % (0-100) from ci_config."""
     info = item_ci.get(env_name) if item_ci else None
-    if not info:
+    if not info or "passrate" not in info:
         return ""
-    status = info.get("status", "unknown")
-    url    = info.get("pipeline_url", "")
-    cls, sym, title = CI_MAP.get(status, ("ci-unknown", "?", f"CI: {status}"))
+    pct  = int(info["passrate"])
+    url  = info.get("pipeline_url", "")
+    cls  = "pr-green" if pct >= 90 else ("pr-yellow" if pct >= 61 else "pr-red")
+    lbl  = str(pct)
+    tip  = f"CI passrate: {pct}%"
     if url:
-        return (f'<a href="{esc(url)}" class="ci-icon {cls}" '
-                f'title="{esc(title)}" target="_blank">{sym}</a>')
-    return f'<span class="ci-icon {cls}" title="{esc(title)}">{sym}</span>'
+        return (f'<a href="{esc(url)}" class="pr-badge {cls}" '
+                f'title="{esc(tip)}" target="_blank">{lbl}</a>')
+    return f'<span class="pr-badge {cls}" title="{esc(tip)}">{lbl}</span>'
 
 
 def bug_badge(tickets: list, product_name: str) -> str:
@@ -300,7 +301,7 @@ def version_cell(
     )
 
     item_ci  = ci_status.get(item_key, {}) if show_ci else {}
-    ci_html  = ci_icon(env_name, item_ci)
+    ci_html  = passrate_badge(env_name, item_ci)
 
     return (
         f'<td class="vc">'
@@ -344,7 +345,6 @@ body { font-family: var(--font); font-size: 13px; background: var(--bg); color: 
 .bar-ts { font-size: 11px; color: #475569; white-space: nowrap; }
 .bar-legend { display: flex; align-items: center; gap: 10px; margin-left: 12px; }
 .leg { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b; }
-.leg .ci-icon { pointer-events: none; }
 
 /* ── table wrapper — this IS the scroll container for the table ── */
 .wrap {
@@ -471,23 +471,19 @@ td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--bor
 
 .cell-meta { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
 
-/* ── CI icons ── */
-.ci-icon {
+/* ── CI passrate badges ── */
+.pr-badge {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 18px; height: 18px; border-radius: 50%;
-  font-size: 11px; font-weight: 700; line-height: 1;
-  text-decoration: none; flex-shrink: 0;
+  min-width: 26px; height: 18px; border-radius: 9px;
+  font-size: 10px; font-weight: 700; color: #fff; line-height: 1;
+  padding: 0 4px; text-decoration: none; flex-shrink: 0;
   transition: transform .12s, opacity .12s;
 }
-a.ci-icon { cursor: pointer; }
-a.ci-icon:hover { opacity: .75; transform: scale(1.15); }
-.ci-success  { background: #16a34a; color: #fff; }
-.ci-failed   { background: #dc2626; color: #fff; }
-.ci-running  { background: #d97706; color: #fff; animation: pulse 1.5s infinite; }
-.ci-canceled { background: #6b7280; color: #fff; }
-.ci-unknown  { background: #e2e8f0; color: #94a3b8; font-size: 13px; }
-
-@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.55 } }
+a.pr-badge { cursor: pointer; }
+a.pr-badge:hover { opacity: .8; transform: scale(1.1); }
+.pr-green  { background: #16a34a; }   /* 90-100 */
+.pr-yellow { background: #d97706; }   /* 61-89  */
+.pr-red    { background: #dc2626; }   /* 0-60   */
 
 /* ── Bug badges ── */
 .bug-badge {
@@ -672,10 +668,9 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
         f'<div class="bar">'
         f'<span class="bar-title">ICE Infrastructure Dashboard</span>'
         f'<div class="bar-legend">'
-        f'<span class="leg"><span class="ci-icon ci-success">✓</span> CI pass</span>'
-        f'<span class="leg"><span class="ci-icon ci-failed">✗</span> CI fail</span>'
-        f'<span class="leg"><span class="ci-icon ci-running">●</span> running</span>'
-        f''
+        f'<span class="leg"><span class="pr-badge pr-green" style="pointer-events:none">95</span> ≥90% pass</span>'
+        f'<span class="leg"><span class="pr-badge pr-yellow" style="pointer-events:none">75</span> 61-89%</span>'
+        f'<span class="leg"><span class="pr-badge pr-red" style="pointer-events:none">42</span> ≤60%</span>'
         f'<span class="leg"><span class="bug-badge bug-high" style="pointer-events:none">N</span> QA bugs</span>'
         f'</div>'
         f'<span class="bar-tag">EDP</span>'
