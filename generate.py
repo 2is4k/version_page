@@ -251,7 +251,9 @@ def passrate_badge(env_name: str, item_ci: dict) -> str:
     return f'<span class="pr-badge {cls}" title="{esc(tip)}">{pct}</span>'
 
 
-def bug_badge(tickets: list, product_name: str) -> str:
+def bug_badge(tickets: list, product_name: str, jira_configured: bool = True) -> str:
+    if not jira_configured:
+        return '<span class="bug-badge bug-zero" title="JIRA not configured for this product">-</span>'
     n       = len(tickets)
     cls     = "bug-zero" if n == 0 else "bug-nonzero"
     bugs_js = esc(json.dumps(tickets))
@@ -741,7 +743,8 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
                 f'<a href="{esc(jira_base)}/projects/{esc(jproj)}" '
                 f'class="jira-lnk" target="_blank">JIRA: {esc(jproj)}</a>'
             )
-        badge_html = bug_badge(tickets, name)
+        jira_configured = bool(jproj and jproj != "CONFIGURE_ME")
+        badge_html = bug_badge(tickets, name, jira_configured=jira_configured)
 
         label_cell = (
             f'<td class="lp">'

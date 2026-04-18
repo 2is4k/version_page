@@ -16,16 +16,22 @@ Used in daily management meetings to give a fast, dense overview of infrastructu
 
 **CI passrate badge** — a coloured pill showing the percentage of CI test runs that passed for that product in that environment:
 
-| Colour | Range | Meaning |
+| Colour | Value | Meaning |
 |---|---|---|
 | Green | 90–100% | Healthy |
 | Yellow | 61–89% | Degraded |
 | Red | 0–60% | Failing |
-| Gray `-` | — | CI not configured for this environment |
+| Gray `-` | — | No version deployed, or CI explicitly marked as not configured |
 
-Clicking the badge opens the corresponding GitLab pipeline.
+Clicking the badge opens the corresponding GitLab pipeline. If no version is deployed in an environment the badge always shows gray `-`, regardless of the configured passrate.
 
-**QA bug badge** — a pill on the product row showing the count of open JIRA bugs whose summary contains `[QA]:`. Hovering shows a popup with ticket key, summary, status, and assignee. Gray `0` means no open bugs.
+**QA bug badge** — a pill on the product row showing the count of open JIRA bugs whose summary contains `[QA]:`. Hovering shows a popup with ticket key, summary, status, and assignee.
+
+| Colour | Value | Meaning |
+|---|---|---|
+| Black | 1+ | Open QA bugs — hover for details |
+| Gray `0` | 0 | No open bugs |
+| Gray `-` | — | JIRA not configured for this product |
 
 **Semver drift arrows** — red `↓` arrows next to a version number indicate that the version in this environment is behind the environment to its left. One arrow = patch, two = minor, three = major.
 
