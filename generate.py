@@ -396,18 +396,12 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
 .env-name { display: block; }
 .env-url  { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,.4); margin-top: 2px; white-space: nowrap; }
 
-/* sticky first two cols in header — outer frame only, no divider between them */
+/* sticky label column in header */
 .gh .sl1, .eh .sl1 {
   position: sticky !important; left: 0; z-index: 95 !important;
   background: #1e293b !important;
   border-left:  2px solid #0f172a !important;
   border-right: none !important;
-}
-.gh .sl2, .eh .sl2 {
-  position: sticky !important; left: 0; z-index: 95 !important;  /* left set by JS */
-  background: #1e293b !important;
-  border-right: none !important;
-  /* box-shadow travels with the sticky element, acting as a fixed right border */
   box-shadow: 3px 0 0 0 #0f172a;
 }
 
@@ -415,21 +409,13 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
 tbody tr { border-bottom: 1px solid var(--border); }
 tbody tr:hover td { background: #f0f9ff !important; }
 
-/* sticky label cells — outer frame only, no divider between them */
-td.lp, td.lt {
-  position: sticky; z-index: 10;
-  background: #f4f6f8; padding: 8px 10px; vertical-align: top;
-}
+/* sticky label column */
 td.lp {
-  left: 0; width: 1px;
+  position: sticky; left: 0; z-index: 10;
+  width: 1px;
+  background: #f4f6f8; padding: 8px 10px; vertical-align: top;
   border-left:  2px solid #0f172a;
   border-right: none;
-}
-td.lt {
-  left: 0; width: 1px;  /* left set by JS */
-  border-left:  none;
-  border-right: none;
-  /* box-shadow travels with the sticky element — visible right border when scrolling */
   box-shadow: 3px 0 0 0 #0f172a;
 }
 
@@ -444,9 +430,9 @@ tr.pr td.lp { border-left: 3px solid #3b82f6; }
 .jira-lnk { font-size: 10px; color: #0052cc; text-decoration: none; margin-top: 3px; display: inline-block; }
 .jira-lnk:hover { text-decoration: underline; }
 
-/* template row */
+/* template row — indented inside the same label column */
 tr.tr { background: #f8fafc; }
-tr.tr td.lt { padding-left: 16px; color: #475569; font-size: 11px; }
+tr.tr td.lp { padding-left: 20px; }
 .tname { display: block; color: #475569; font-size: 11px; overflow-wrap: break-word; word-break: break-all; }
 
 /* update row — last row of the table */
@@ -557,35 +543,21 @@ JS = r"""
 (function () {
   'use strict';
 
-  /* ── Freeze both sticky columns at their natural content width ── */
-  function freezeStickyCols() {
-    /* measure natural widths before locking anything */
-    var col1 = document.querySelector('td.lp, th.sl1');
-    var col2 = document.querySelector('td.lt, th.sl2');
-    if (!col1 || !col2) return;
-
-    var w1 = col1.offsetWidth;
-    var w2 = col2.offsetWidth;
-
-    /* pin every cell in column 1 to exactly that width */
+  /* ── Freeze the sticky label column at its natural content width ── */
+  function freezeStickyCol() {
+    var first = document.querySelector('td.lp, th.sl1');
+    if (!first) return;
+    var w = first.offsetWidth;
     document.querySelectorAll('td.lp, th.sl1').forEach(function (el) {
-      el.style.width    = w1 + 'px';
-      el.style.minWidth = w1 + 'px';
-      el.style.maxWidth = w1 + 'px';
-    });
-
-    /* pin every cell in column 2 to exactly that width, left = width of col 1 */
-    document.querySelectorAll('td.lt, th.sl2').forEach(function (el) {
-      el.style.width    = w2 + 'px';
-      el.style.minWidth = w2 + 'px';
-      el.style.maxWidth = w2 + 'px';
-      el.style.left     = w1 + 'px';
+      el.style.width    = w + 'px';
+      el.style.minWidth = w + 'px';
+      el.style.maxWidth = w + 'px';
     });
   }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', freezeStickyCols);
+    document.addEventListener('DOMContentLoaded', freezeStickyCol);
   } else {
-    freezeStickyCols();
+    freezeStickyCol();
   }
 
   var popup = document.getElementById('bug-popup');
@@ -708,15 +680,14 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
 
     # ── Group header row ───────────────────────────────────────────────────
     p.append('<tr class="gh">')
-    p.append('<th class="lbl sl1"></th><th class="lbl sl2"></th>')
+    p.append('<th class="lbl sl1"></th>')
     for g in groups:
         p.append(f'<th class="{g["cls"]}" colspan="{g["span"]}">{esc(g["label"])}</th>')
     p.append('</tr>')
 
     # ── Env detail header row ──────────────────────────────────────────────
     p.append('<tr class="eh">')
-    p.append('<th class="lbl sl1">Product</th>')
-    p.append('<th class="lbl sl2">Workflow Template</th>')
+    p.append('<th class="lbl sl1">Product / Template</th>')
     for env in envs:
         g   = env.get("group", "infratest")
         cls = GROUP_CLASSES.get(g, ("g-it", "e-it"))[1]
@@ -733,7 +704,7 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
     p.append('<tbody>')
 
     # Last-update row — first row of the table
-    p.append('<tr class="ur"><td class="ur-label">Last Update</td><td></td>')
+    p.append('<tr class="ur"><td class="ur-label">Last Update</td>')
     for env in envs:
         val = versions.get(env["name"], {}).get("update_time", "")
         p.append(f'<td class="vc">{esc(val)}</td>')
@@ -770,7 +741,7 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
             + f'</td>'
         )
 
-        p.append(f'<tr class="pr">{label_cell}<td class="lt"></td>')
+        p.append(f'<tr class="pr">{label_cell}')
         for i, env in enumerate(envs):
             prev_v = _raw_version_str(versions.get(envs[i-1]["name"], {}).get(key, "")) if i > 0 else ""
             cur_v  = _raw_version_str(versions.get(env["name"], {}).get(key, ""))
@@ -787,12 +758,12 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
                 for a in tpl.get("additional_urls", [])
             )
             tlabel = (
-                f'<td class="lt">'
+                f'<td class="lp">'
                 f'<span class="tname">{esc(tname)}</span>'
                 + (f'<div class="plinks">{tlinks}</div>' if tlinks else "")
                 + f'</td>'
             )
-            p.append(f'<tr class="tr"><td class="lp"></td>{tlabel}')
+            p.append(f'<tr class="tr">{tlabel}')
             for i, env in enumerate(envs):
                 prev_v = _raw_version_str(versions.get(envs[i-1]["name"], {}).get(tkey, "")) if i > 0 else ""
                 cur_v  = _raw_version_str(versions.get(env["name"], {}).get(tkey, ""))
