@@ -233,7 +233,7 @@ a.pr-badge:hover { opacity: .8; transform: scale(1.1); }
 </style>
 </head>
 <body>
-<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="pr-badge pr-green" style="pointer-events:none">95</span> ≥90% pass</span><span class="leg"><span class="pr-badge pr-yellow" style="pointer-events:none">75</span> 61-89%</span><span class="leg"><span class="pr-badge pr-red" style="pointer-events:none">42</span> ≤60%</span><span class="leg"><span class="bug-badge bug-nonzero" style="pointer-events:none">3</span> QA bugs</span><span class="leg"><span class="bug-badge bug-zero" style="pointer-events:none">0</span> none</span></div><span class="bar-tag">EDP</span><span class="bar-ts">Generated 2026-04-18 01:36 UTC</span></div>
+<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="pr-badge pr-green" style="pointer-events:none">95</span> ≥90% pass</span><span class="leg"><span class="pr-badge pr-yellow" style="pointer-events:none">75</span> 61-89%</span><span class="leg"><span class="pr-badge pr-red" style="pointer-events:none">42</span> ≤60%</span><span class="leg"><span class="bug-badge bug-nonzero" style="pointer-events:none">3</span> QA bugs</span><span class="leg"><span class="bug-badge bug-zero" style="pointer-events:none">0</span> none</span></div><span class="bar-tag">EDP</span><span class="bar-ts">Generated 2026-04-18 01:38 UTC</span></div>
 <div class="wrap"><table>
 <thead>
 <tr class="gh">
@@ -551,19 +551,35 @@ a.pr-badge:hover { opacity: .8; transform: scale(1.1); }
 (function () {
   'use strict';
 
-  /* ── Fix left offset of second sticky column after layout ── */
-  function fixStickyCol2() {
-    var firstCell = document.querySelector('td.lp, th.sl1');
-    if (!firstCell) return;
-    var w = firstCell.offsetWidth + 'px';
+  /* ── Freeze both sticky columns at their natural content width ── */
+  function freezeStickyCols() {
+    /* measure natural widths before locking anything */
+    var col1 = document.querySelector('td.lp, th.sl1');
+    var col2 = document.querySelector('td.lt, th.sl2');
+    if (!col1 || !col2) return;
+
+    var w1 = col1.offsetWidth;
+    var w2 = col2.offsetWidth;
+
+    /* pin every cell in column 1 to exactly that width */
+    document.querySelectorAll('td.lp, th.sl1').forEach(function (el) {
+      el.style.width    = w1 + 'px';
+      el.style.minWidth = w1 + 'px';
+      el.style.maxWidth = w1 + 'px';
+    });
+
+    /* pin every cell in column 2 to exactly that width, left = width of col 1 */
     document.querySelectorAll('td.lt, th.sl2').forEach(function (el) {
-      el.style.left = w;
+      el.style.width    = w2 + 'px';
+      el.style.minWidth = w2 + 'px';
+      el.style.maxWidth = w2 + 'px';
+      el.style.left     = w1 + 'px';
     });
   }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fixStickyCol2);
+    document.addEventListener('DOMContentLoaded', freezeStickyCols);
   } else {
-    fixStickyCol2();
+    freezeStickyCols();
   }
 
   var popup = document.getElementById('bug-popup');

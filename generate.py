@@ -557,19 +557,35 @@ JS = r"""
 (function () {
   'use strict';
 
-  /* ── Fix left offset of second sticky column after layout ── */
-  function fixStickyCol2() {
-    var firstCell = document.querySelector('td.lp, th.sl1');
-    if (!firstCell) return;
-    var w = firstCell.offsetWidth + 'px';
+  /* ── Freeze both sticky columns at their natural content width ── */
+  function freezeStickyCols() {
+    /* measure natural widths before locking anything */
+    var col1 = document.querySelector('td.lp, th.sl1');
+    var col2 = document.querySelector('td.lt, th.sl2');
+    if (!col1 || !col2) return;
+
+    var w1 = col1.offsetWidth;
+    var w2 = col2.offsetWidth;
+
+    /* pin every cell in column 1 to exactly that width */
+    document.querySelectorAll('td.lp, th.sl1').forEach(function (el) {
+      el.style.width    = w1 + 'px';
+      el.style.minWidth = w1 + 'px';
+      el.style.maxWidth = w1 + 'px';
+    });
+
+    /* pin every cell in column 2 to exactly that width, left = width of col 1 */
     document.querySelectorAll('td.lt, th.sl2').forEach(function (el) {
-      el.style.left = w;
+      el.style.width    = w2 + 'px';
+      el.style.minWidth = w2 + 'px';
+      el.style.maxWidth = w2 + 'px';
+      el.style.left     = w1 + 'px';
     });
   }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fixStickyCol2);
+    document.addEventListener('DOMContentLoaded', freezeStickyCols);
   } else {
-    fixStickyCol2();
+    freezeStickyCols();
   }
 
   var popup = document.getElementById('bug-popup');
