@@ -436,7 +436,7 @@ td.lt {
 /* product row */
 tr.pr { background: #fff; }
 tr.pr td.lp { border-left: 3px solid #3b82f6; }
-.pname { font-weight: 700; color: #0f172a; font-size: 13px; line-height: 1.3; overflow-wrap: break-word; word-break: break-word; }
+.pname { font-weight: 700; color: #0f172a; font-size: 13px; line-height: 1.3; white-space: nowrap; }
 .phead { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 3px; }
 .plinks { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; }
 .plink  { font-size: 10px; color: #64748b; text-decoration: none; overflow-wrap: break-word; word-break: break-word; }
