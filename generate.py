@@ -373,10 +373,10 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
   color: rgba(255,255,255,.65); white-space: nowrap;
 }
 .gh .lbl  { background: #1e293b; color: #334155; }
-.gh .g-it { background: #1e3a8a; }
-.gh .g-ve { background: #3730a3; }
-.gh .g-ad { background: #0e7490; }
-.gh .g-pr { background: #92400e; }
+.gh .g-it { background: #1e3a8a; }   /* blue        — dev / test    */
+.gh .g-ve { background: #0c4a6e; }   /* dark sky    — validation    */
+.gh .g-ad { background: #134e4a; }   /* dark teal   — near-stable   */
+.gh .g-pr { background: #14532d; }   /* forest green— production    */
 
 /* ── env-header row ── */
 .eh th {
@@ -390,10 +390,10 @@ table { border-collapse: collapse; width: max-content; min-width: 100%; backgrou
   white-space: nowrap;
 }
 .eh .lbl { background: #1e293b; text-align: left !important; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
-.eh .e-it { background: #1e3a8a; border-top: 2px solid #60a5fa; }
-.eh .e-ve { background: #312e81; border-top: 2px solid #818cf8; }
-.eh .e-ad { background: #155e75; border-top: 2px solid #22d3ee; }
-.eh .e-pr { background: #78350f; border-top: 2px solid #fbbf24; }
+.eh .e-it { background: #1e3a8a; border-top: 2px solid #60a5fa; }   /* blue   / blue-300  */
+.eh .e-ve { background: #0c4a6e; border-top: 2px solid #38bdf8; }   /* sky    / sky-400   */
+.eh .e-ad { background: #134e4a; border-top: 2px solid #2dd4bf; }   /* teal   / teal-400  */
+.eh .e-pr { background: #14532d; border-top: 2px solid #4ade80; }   /* green  / green-400 */
 .env-name { display: block; }
 .env-url  { display: block; font-size: 9px; font-weight: 400; color: rgba(255,255,255,.4); margin-top: 2px; white-space: nowrap; }
 
