@@ -12,9 +12,9 @@ from .jira_client import JiraResult
 
 GROUP_CLASSES: dict[str, tuple[str, str]] = {
     "infratest": ("g-it", "e-it"),
-    "ve":        ("g-ve", "e-ve"),
-    "appdev":    ("g-ad", "e-ad"),
-    "prod":      ("g-pr", "e-pr"),
+    "ve": ("g-ve", "e-ve"),
+    "appdev": ("g-ad", "e-ad"),
+    "prod": ("g-pr", "e-pr"),
 }
 
 CSS = """
@@ -330,6 +330,7 @@ JS = r"""
 
 # ── Renderer ─────────────────────────────────────────────────────────────────
 
+
 class DashboardRenderer:
     """Renders the full dashboard HTML from collected data."""
 
@@ -337,12 +338,12 @@ class DashboardRenderer:
         self,
         config: dict,
         versions: dict,
-        ci_status: dict,
+        passrates: dict,
         jira_bugs: dict[str, JiraResult],
     ) -> None:
-        self.config    = config
-        self.versions  = versions
-        self.ci_status = ci_status
+        self.config = config
+        self.versions = versions
+        self.passrates = passrates
         self.jira_bugs = jira_bugs
         self.jira_base = config.get("jira_base_url", "").rstrip("/")
         self.generated = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
@@ -354,23 +355,23 @@ class DashboardRenderer:
         parts += self._head()
         parts += self._bar()
         parts += self._table()
-        parts.append(f'<script>{JS}</script>')
-        parts.append('</body></html>')
+        parts.append(f"<script>{JS}</script>")
+        parts.append("</body></html>")
         return "\n".join(parts)
 
     # ── private: page sections ────────────────────────────────────────────────
 
     def _head(self) -> list[str]:
         return [
-            '<!DOCTYPE html>',
+            "<!DOCTYPE html>",
             '<html lang="en">',
-            '<head>',
+            "<head>",
             '<meta charset="UTF-8">',
             '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-            '<title>ICE Infrastructure Dashboard</title>',
-            f'<style>{CSS}</style>',
-            '</head>',
-            '<body>',
+            "<title>ICE Infrastructure Dashboard</title>",
+            f"<style>{CSS}</style>",
+            "</head>",
+            "<body>",
         ]
 
     def _bar(self) -> list[str]:
@@ -385,24 +386,26 @@ class DashboardRenderer:
             f'<span class="leg"><span class="bug-badge bug-nonzero" style="pointer-events:none">3</span> QA bugs</span>'
             f'<span class="leg"><span class="bug-badge bug-zero"    style="pointer-events:none">0</span> none</span>'
             f'<span class="leg"><span class="bug-badge bug-error"   style="pointer-events:none">!</span> JIRA error</span>'
-            f'</div>'
+            f"</div>"
             f'<span class="bar-tag">EDP</span>'
             f'<span class="bar-ts" data-ts="{ts[:10]}">Generated {ts}</span>'
-            f'</div>'
+            f"</div>"
         ]
 
     def _table(self) -> list[str]:
-        envs   = self.config["environments"]
+        envs = self.config["environments"]
         groups = self._compute_groups(envs)
 
-        p: list[str] = ['<div class="wrap"><table>', '<thead>']
+        p: list[str] = ['<div class="wrap"><table>', "<thead>"]
 
         # Group header
         p.append('<tr class="gh">')
         p.append('<th class="lbl sl1"></th>')
         for g in groups:
-            p.append(f'<th class="{g["cls"]}" colspan="{g["span"]}">{_esc(g["label"])}</th>')
-        p.append('</tr>')
+            p.append(
+                f'<th class="{g["cls"]}" colspan="{g["span"]}">{_esc(g["label"])}</th>'
+            )
+        p.append("</tr>")
 
         # Env header
         p.append('<tr class="eh">')
@@ -413,35 +416,35 @@ class DashboardRenderer:
                 f'<th class="{cls}">'
                 f'<span class="env-name">{_esc(env["name"])}</span>'
                 f'<span class="env-url">{_esc(env.get("url", ""))}</span>'
-                f'</th>'
+                f"</th>"
             )
-        p.append('</tr>')
-        p.append('</thead>')
-        p.append('<tbody>')
+        p.append("</tr>")
+        p.append("</thead>")
+        p.append("<tbody>")
 
         # Last Update row
         p.append('<tr class="ur"><td class="ur-label">Last Update</td>')
         for env in envs:
-            val  = self.versions.get(env["name"], {}).get("update_time", "")
+            val = self.versions.get(env["name"], {}).get("update_time", "")
             date = val[:10] if val else ""
             attr = f' data-ts="{_esc(date)}"' if date else ""
             p.append(f'<td class="vc"{attr}>{_esc(val)}</td>')
-        p.append('</tr>')
+        p.append("</tr>")
 
         # Product rows
         for product in self.config["products"]:
             p += self._product_rows(product, envs)
 
-        p += ['</tbody>', '</table></div>', '<div id="bug-popup"></div>']
+        p += ["</tbody>", "</table></div>", '<div id="bug-popup"></div>']
         return p
 
     def _product_rows(self, product: dict, envs: list) -> list[str]:
-        key       = product["key"]
-        name      = product["name"]
-        jproj     = product.get("jira_project", "")
-        add_urls  = product.get("additional_urls", [])
+        key = product["key"]
+        name = product["name"]
+        jproj = product.get("jira_project", "")
+        add_urls = product.get("additional_urls", [])
         templates = product.get("templates", [])
-        result    = self.jira_bugs.get(key, JiraResult(configured=False))
+        result = self.jira_bugs.get(key, JiraResult(configured=False))
 
         plinks = "".join(
             f'<a href="{_esc(a["url"])}" class="plink" target="_blank">{_esc(a["name"])}</a>'
@@ -450,23 +453,30 @@ class DashboardRenderer:
         jira_link = (
             f'<a href="{_esc(self.jira_base)}/projects/{_esc(jproj)}" '
             f'class="jira-lnk" target="_blank">JIRA: {_esc(jproj)}</a>'
-            if jproj and jproj != "CONFIGURE_ME" else ""
+            if jproj and jproj != "CONFIGURE_ME"
+            else ""
         )
         label_cell = (
             f'<td class="lp">'
             f'<div class="phead"><span class="pname">{_esc(name)}</span>'
-            f'{self._bug_badge(result, name)}</div>'
+            f"{self._bug_badge(result, name)}</div>"
             + (f'<div class="plinks">{plinks}</div>' if plinks else "")
             + jira_link
-            + '</td>'
+            + "</td>"
         )
 
         rows: list[str] = [f'<tr class="pr">{label_cell}']
         for i, env in enumerate(envs):
-            prev_v = _raw_ver(self.versions.get(envs[i-1]["name"], {}).get(key, "")) if i > 0 else ""
-            cur_v  = _raw_ver(self.versions.get(env["name"], {}).get(key, ""))
-            rows.append(self._version_cell(env["name"], key, drift=_semver_drift(cur_v, prev_v)))
-        rows.append('</tr>')
+            prev_v = (
+                _raw_ver(self.versions.get(envs[i - 1]["name"], {}).get(key, ""))
+                if i > 0
+                else ""
+            )
+            cur_v = _raw_ver(self.versions.get(env["name"], {}).get(key, ""))
+            rows.append(
+                self._version_cell(env["name"], key, drift=_semver_drift(cur_v, prev_v))
+            )
+        rows.append("</tr>")
 
         for tpl in templates:
             rows += self._template_rows(tpl, envs)
@@ -474,8 +484,8 @@ class DashboardRenderer:
         return rows
 
     def _template_rows(self, tpl: dict, envs: list) -> list[str]:
-        tkey   = tpl["key"]
-        tname  = tpl["name"]
+        tkey = tpl["key"]
+        tname = tpl["name"]
         tlinks = "".join(
             f'<a href="{_esc(a["url"])}" class="plink" target="_blank">{_esc(a["name"])}</a>'
             for a in tpl.get("additional_urls", [])
@@ -484,14 +494,22 @@ class DashboardRenderer:
             f'<td class="lp">'
             f'<span class="tname">{_esc(tname)}</span>'
             + (f'<div class="plinks">{tlinks}</div>' if tlinks else "")
-            + '</td>'
+            + "</td>"
         )
         rows = [f'<tr class="tr">{tlabel}']
         for i, env in enumerate(envs):
-            prev_v = _raw_ver(self.versions.get(envs[i-1]["name"], {}).get(tkey, "")) if i > 0 else ""
-            cur_v  = _raw_ver(self.versions.get(env["name"], {}).get(tkey, ""))
-            rows.append(self._version_cell(env["name"], tkey, show_ci=False, drift=_semver_drift(cur_v, prev_v)))
-        rows.append('</tr>')
+            prev_v = (
+                _raw_ver(self.versions.get(envs[i - 1]["name"], {}).get(tkey, ""))
+                if i > 0
+                else ""
+            )
+            cur_v = _raw_ver(self.versions.get(env["name"], {}).get(tkey, ""))
+            rows.append(
+                self._version_cell(
+                    env["name"], tkey, show_testrail=False, drift=_semver_drift(cur_v, prev_v)
+                )
+            )
+        rows.append("</tr>")
         return rows
 
     # ── private: cell renderers ───────────────────────────────────────────────
@@ -500,35 +518,41 @@ class DashboardRenderer:
         self,
         env_name: str,
         item_key: str,
-        show_ci: bool = True,
+        show_testrail: bool = True,
         drift: int = 0,
     ) -> str:
         raw = self.versions.get(env_name, {}).get(item_key, "")
 
         if isinstance(raw, dict):
             version = raw.get("version", "")
-            url     = raw.get("url")
-            extras  = raw.get("additional_urls", [])
+            url = raw.get("url")
+            extras = raw.get("additional_urls", [])
         else:
             version = str(raw) if raw else ""
-            url     = None
-            extras  = []
+            url = None
+            extras = []
 
         if version in ("ERROR", ""):
             version = ""
 
-        drift_titles = ["", "patch version behind", "minor version behind", "major version behind"]
+        drift_titles = [
+            "",
+            "patch version behind",
+            "minor version behind",
+            "major version behind",
+        ]
         drift_html = (
             f'<span class="drift drift-{drift}" title="{drift_titles[drift]}">{"↓" * drift}</span>'
-            if drift > 0 else ""
+            if drift > 0
+            else ""
         )
 
         if version:
             ver_html = (
                 f'<a href="{_esc(url)}" class="version-link" target="_blank">'
-                f'{_esc(version)}</a>{drift_html}'
-                if url else
-                f'<span class="version-text">{_esc(version)}</span>{drift_html}'
+                f"{_esc(version)}</a>{drift_html}"
+                if url
+                else f'<span class="version-text">{_esc(version)}</span>{drift_html}'
             )
         else:
             ver_html = '<span class="version-empty">—</span>'
@@ -538,19 +562,23 @@ class DashboardRenderer:
             for a in extras
         )
 
-        if show_ci and not version:
-            ci_html = '<span class="pr-badge pr-none" title="No version deployed">-</span>'
-        elif show_ci:
-            ci_html = self._passrate_badge(env_name, self.ci_status.get(item_key, {}))
+        if show_testrail and not version:
+            testrail_html = (
+                '<span class="pr-badge pr-none" title="No version deployed">-</span>'
+            )
+        elif show_testrail:
+            testrail_html = self._passrate_badge(
+                env_name, self.passrates.get(item_key, {})
+            )
         else:
-            ci_html = ""
+            testrail_html = ""
 
         return (
             f'<td class="vc">'
             f'<div class="cell-v">{ver_html}</div>'
             + (f'<div class="cell-links">{links_html}</div>' if links_html else "")
-            + f'<div class="cell-meta">{ci_html}</div>'
-            f'</td>'
+            + f'<div class="cell-meta">{testrail_html}</div>'
+            f"</td>"
         )
 
     @staticmethod
@@ -559,7 +587,7 @@ class DashboardRenderer:
         if not info or "passrate" not in info:
             return ""
         raw = info["passrate"]
-        url = info.get("pipeline_url", "")
+        url = info.get("testplan_url", "")
         if str(raw) == "-":
             return '<span class="pr-badge pr-none" title="CI not configured for this environment">-</span>'
         pct = int(raw)
@@ -575,10 +603,12 @@ class DashboardRenderer:
             return '<span class="bug-badge bug-zero" title="JIRA not configured for this product">-</span>'
         if result.error:
             return '<span class="bug-badge bug-error" title="Failed to retrieve JIRA data">!</span>'
-        n       = len(result.tickets)
-        cls     = "bug-zero" if n == 0 else "bug-nonzero"
+        n = len(result.tickets)
+        cls = "bug-zero" if n == 0 else "bug-nonzero"
         bugs_js = _esc(json.dumps(result.tickets))
-        title   = "No open QA bugs" if n == 0 else f"{n} open QA bug(s) — hover for details"
+        title = (
+            "No open QA bugs" if n == 0 else f"{n} open QA bug(s) — hover for details"
+        )
         return (
             f'<span class="bug-badge {cls}" data-bugs="{bugs_js}" '
             f'data-product="{_esc(product_name)}" title="{title}">{n}</span>'
@@ -590,7 +620,7 @@ class DashboardRenderer:
     def _compute_groups(envs: list) -> list[dict]:
         groups: list[dict] = []
         for env in envs:
-            g   = env.get("group", "infratest")
+            g = env.get("group", "infratest")
             lbl = env.get("group_label", g.upper())
             cls = GROUP_CLASSES.get(g, ("g-it", "e-it"))[0]
             if groups and groups[-1]["label"] == lbl:
@@ -602,11 +632,16 @@ class DashboardRenderer:
 
 # ── Module-level helpers ──────────────────────────────────────────────────────
 
+
 def _esc(s: Any) -> str:
-    return (str(s)
-            .replace("&", "&amp;").replace("<", "&lt;")
-            .replace(">", "&gt;").replace('"', "&quot;")
-            .replace("'", "&#39;"))
+    return (
+        str(s)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+        .replace("'", "&#39;")
+    )
 
 
 def _raw_ver(version_data: Any) -> str:
@@ -620,7 +655,7 @@ def _raw_ver(version_data: Any) -> str:
 def _extract_semver(v: str) -> tuple:
     if not v:
         return ()
-    candidates = re.findall(r'\d+(?:\.\d+)+', v)
+    candidates = re.findall(r"\d+(?:\.\d+)+", v)
     if not candidates:
         return ()
     best = max(candidates, key=lambda s: len(s.split(".")))
@@ -632,7 +667,7 @@ def _semver_drift(current: str, previous: str) -> int:
     prv = _extract_semver(previous)
     if not cur or not prv or cur >= prv:
         return 0
-    n   = max(len(cur), len(prv))
+    n = max(len(cur), len(prv))
     cur += (0,) * (n - len(cur))
     prv += (0,) * (n - len(prv))
     for i, (c, p) in enumerate(zip(cur, prv)):

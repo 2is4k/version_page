@@ -1,15 +1,11 @@
 stages:
-  - generate
   - pages
-
-# Optional pre-step: fetch live CI status and JIRA bugs.
-# Requires CI/CD variables: GITLAB_TOKEN, JIRA_TOKEN, JIRA_USER
-# If variables are not set, generate.py falls back to dummy data automatically.
 
 pages:
   stage: pages
   image: python:3.11-slim
   script:
+    - python -m pip install -r requirements.txt
     - python generate.py
   artifacts:
     paths:

@@ -17,12 +17,12 @@ import sys
 from pathlib import Path
 
 from dashboard.loader import load_config, load_versions
-from dashboard.gitlab_client import GitLabClient
+from dashboard.testrail_client import TestRailClient
 from dashboard.jira_client import JiraClient
 from dashboard.renderer import DashboardRenderer
 
 BASE_DIR = Path(__file__).parent
-EXAMPLE  = "--example" in sys.argv or "--dummy" in sys.argv
+EXAMPLE = "--example" in sys.argv or "--dummy" in sys.argv
 
 
 def main() -> None:
@@ -32,14 +32,14 @@ def main() -> None:
     print("Loading versions...")
     versions = load_versions(config, BASE_DIR / "versions")
 
-    print("Fetching CI status...")
-    ci_data = GitLabClient(config, example=EXAMPLE).fetch_ci_status()
+    print("Fetching TestRail status...")
+    passrates = TestRailClient(config, versions, example=EXAMPLE).fetch_passrates()
 
     print("Fetching JIRA bugs...")
     jira_data = JiraClient(config, example=EXAMPLE).fetch_bugs()
 
     print("Generating HTML...")
-    html = DashboardRenderer(config, versions, ci_data, jira_data).render()
+    html = DashboardRenderer(config, versions, passrates, jira_data).render()
 
     out = BASE_DIR / "public" / "index.html"
     out.parent.mkdir(exist_ok=True)
