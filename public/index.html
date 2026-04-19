@@ -33,6 +33,7 @@ body { font-family: var(--font); font-size: 13px; background: var(--bg); color: 
   letter-spacing: .08em; text-transform: uppercase;
 }
 .bar-ts { font-size: 11px; color: #475569; white-space: nowrap; }
+.bar-ts.stale { color: #f97316; font-weight: 600; }
 .bar-legend { display: flex; align-items: center; gap: 10px; margin-left: 12px; }
 .leg { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b; }
 
@@ -121,6 +122,7 @@ tr.tr td.lp { padding-left: 20px; }
 tr.ur { background: #f8fafc; border-top: 2px solid var(--border); }
 tr.ur td { font-size: 11px; color: var(--muted); padding: 6px 10px; font-style: italic; }
 td.ur-label { padding: 6px 10px; font-size: 11px; color: var(--muted); font-style: italic; font-weight: 600; }
+tr.ur td.stale { background: #fff7ed; color: #c2410c; font-style: normal; font-weight: 600; }
 
 /* ── version cells ── */
 td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--border); white-space: nowrap; width: 1px; background: #fff; }
@@ -219,7 +221,7 @@ a.pr-badge:hover { opacity: .8; transform: scale(1.1); }
 </style>
 </head>
 <body>
-<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="pr-badge pr-green" style="pointer-events:none">95</span> ≥90% pass</span><span class="leg"><span class="pr-badge pr-yellow" style="pointer-events:none">75</span> 61-89%</span><span class="leg"><span class="pr-badge pr-red" style="pointer-events:none">42</span> ≤60%</span><span class="leg"><span class="bug-badge bug-nonzero" style="pointer-events:none">3</span> QA bugs</span><span class="leg"><span class="bug-badge bug-zero" style="pointer-events:none">0</span> none</span></div><span class="bar-tag">EDP</span><span class="bar-ts">Generated 2026-04-18 01:48 UTC</span></div>
+<div class="bar"><span class="bar-title">ICE Infrastructure Dashboard</span><div class="bar-legend"><span class="leg"><span class="pr-badge pr-green" style="pointer-events:none">95</span> ≥90% pass</span><span class="leg"><span class="pr-badge pr-yellow" style="pointer-events:none">75</span> 61-89%</span><span class="leg"><span class="pr-badge pr-red" style="pointer-events:none">42</span> ≤60%</span><span class="leg"><span class="bug-badge bug-nonzero" style="pointer-events:none">3</span> QA bugs</span><span class="leg"><span class="bug-badge bug-zero" style="pointer-events:none">0</span> none</span></div><span class="bar-tag">EDP</span><span class="bar-ts" data-ts="2026-04-19">Generated 2026-04-19 07:44 UTC</span></div>
 <div class="wrap"><table>
 <thead>
 <tr class="gh">
@@ -242,13 +244,13 @@ a.pr-badge:hover { opacity: .8; transform: scale(1.1); }
 </thead>
 <tbody>
 <tr class="ur"><td class="ur-label">Last Update</td>
-<td class="vc">2026-04-15 01:09:55</td>
-<td class="vc">2026-04-15 01:10:00</td>
-<td class="vc">2026-04-15 01:10:04</td>
-<td class="vc">2026-04-15 17:50:02</td>
-<td class="vc">2026-04-15 17:57:23</td>
-<td class="vc">2026-04-15 18:20:22</td>
-<td class="vc">2026-04-15 11:15:12</td>
+<td class="vc" data-ts="2026-04-15">2026-04-15 01:09:55</td>
+<td class="vc" data-ts="2026-04-15">2026-04-15 01:10:00</td>
+<td class="vc" data-ts="2026-04-15">2026-04-15 01:10:04</td>
+<td class="vc" data-ts="2026-04-15">2026-04-15 17:50:02</td>
+<td class="vc" data-ts="2026-04-15">2026-04-15 17:57:23</td>
+<td class="vc" data-ts="2026-04-15">2026-04-15 18:20:22</td>
+<td class="vc" data-ts="2026-04-15">2026-04-15 11:15:12</td>
 </tr>
 <tr class="pr"><td class="lp"><div class="phead"><span class="pname">EDP Client Access 1.5</span><span class="bug-badge bug-zero" title="JIRA not configured for this product">-</span></div><div class="plinks"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access/-/blob/main/CHANGELOG.md" class="plink" target="_blank">release notes</a><a href="https://confluence.bare.pandrosion.org/spaces/EDPI30/pages/120914395/Client+Access+ARCH" class="plink" target="_blank">architecture</a></div></td>
 <td class="vc"><div class="cell-v"><a href="https://client-access.ice.infra.dev.nzero.test/docs" class="version-link" target="_blank">1.5-1.4.0</a></div><div class="cell-meta"><a href="https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-client-access-tests/-/pipelines/2101" class="pr-badge pr-green" title="CI passrate: 100%" target="_blank">100</a></div></td>
@@ -551,6 +553,26 @@ a.pr-badge:hover { opacity: .8; transform: scale(1.1); }
     document.addEventListener('DOMContentLoaded', freezeStickyCol);
   } else {
     freezeStickyCol();
+  }
+
+  /* ── Mark stale timestamps (date != today) ── */
+  function checkStale() {
+    var today = new Date();
+    var yy    = today.getFullYear();
+    var mm    = String(today.getMonth() + 1).padStart(2, '0');
+    var dd    = String(today.getDate()).padStart(2, '0');
+    var todayIso = yy + '-' + mm + '-' + dd;
+
+    document.querySelectorAll('[data-ts]').forEach(function (el) {
+      if (el.dataset.ts && el.dataset.ts !== todayIso) {
+        el.classList.add('stale');
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkStale);
+  } else {
+    checkStale();
   }
 
   var popup = document.getElementById('bug-popup');

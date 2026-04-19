@@ -351,6 +351,7 @@ body { font-family: var(--font); font-size: 13px; background: var(--bg); color: 
   letter-spacing: .08em; text-transform: uppercase;
 }
 .bar-ts { font-size: 11px; color: #475569; white-space: nowrap; }
+.bar-ts.stale { color: #f97316; font-weight: 600; }
 .bar-legend { display: flex; align-items: center; gap: 10px; margin-left: 12px; }
 .leg { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b; }
 
@@ -439,6 +440,7 @@ tr.tr td.lp { padding-left: 20px; }
 tr.ur { background: #f8fafc; border-top: 2px solid var(--border); }
 tr.ur td { font-size: 11px; color: var(--muted); padding: 6px 10px; font-style: italic; }
 td.ur-label { padding: 6px 10px; font-size: 11px; color: var(--muted); font-style: italic; font-weight: 600; }
+tr.ur td.stale { background: #fff7ed; color: #c2410c; font-style: normal; font-weight: 600; }
 
 /* ── version cells ── */
 td.vc { padding: 7px 8px; vertical-align: top; border-right: 1px solid var(--border); white-space: nowrap; width: 1px; background: #fff; }
@@ -560,6 +562,26 @@ JS = r"""
     freezeStickyCol();
   }
 
+  /* ── Mark stale timestamps (date != today) ── */
+  function checkStale() {
+    var today = new Date();
+    var yy    = today.getFullYear();
+    var mm    = String(today.getMonth() + 1).padStart(2, '0');
+    var dd    = String(today.getDate()).padStart(2, '0');
+    var todayIso = yy + '-' + mm + '-' + dd;
+
+    document.querySelectorAll('[data-ts]').forEach(function (el) {
+      if (el.dataset.ts && el.dataset.ts !== todayIso) {
+        el.classList.add('stale');
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkStale);
+  } else {
+    checkStale();
+  }
+
   var popup = document.getElementById('bug-popup');
   var hideTimer;
 
@@ -671,7 +693,7 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
         f'<span class="leg"><span class="bug-badge bug-zero" style="pointer-events:none">0</span> none</span>'
         f'</div>'
         f'<span class="bar-tag">EDP</span>'
-        f'<span class="bar-ts">Generated {generated}</span>'
+        f'<span class="bar-ts" data-ts="{generated[:10]}">Generated {generated}</span>'
         f'</div>'
     )
 
@@ -706,8 +728,10 @@ def generate_html(config: dict, versions: dict, ci_status: dict, jira_bugs: dict
     # Last-update row — first row of the table
     p.append('<tr class="ur"><td class="ur-label">Last Update</td>')
     for env in envs:
-        val = versions.get(env["name"], {}).get("update_time", "")
-        p.append(f'<td class="vc">{esc(val)}</td>')
+        val  = versions.get(env["name"], {}).get("update_time", "")
+        date = val[:10] if val else ""
+        attr = f' data-ts="{esc(date)}"' if date else ""
+        p.append(f'<td class="vc"{attr}>{esc(val)}</td>')
     p.append('</tr>')
 
     # Product rows
