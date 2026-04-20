@@ -1,4 +1,4 @@
-# ICE Infrastructure Dashboard
+# Infrastructure Dashboard
 
 > **⚠ Internal & experimental.** This page is not intended for productive use or as an official reference for reports. Data may be incomplete, delayed, or based on dummy values. Use it as a quick orientation aid only.
 

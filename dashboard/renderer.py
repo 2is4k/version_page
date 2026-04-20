@@ -1,4 +1,4 @@
-"""HTML renderer for the ICE Infrastructure Dashboard."""
+"""HTML renderer for the Infrastructure Dashboard."""
 
 import json
 import re
@@ -396,7 +396,7 @@ class DashboardRenderer:
             "<head>",
             '<meta charset="UTF-8">',
             '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-            "<title>ICE Infrastructure Dashboard</title>",
+            "<title>Infrastructure Dashboard</title>",
             f"<style>{CSS}</style>",
             "</head>",
             "<body>",
@@ -406,7 +406,7 @@ class DashboardRenderer:
         ts = self.generated
         return [
             f'<div class="bar">'
-            f'<span class="bar-title">ICE Infrastructure Dashboard</span>'
+            f'<span class="bar-title">Infrastructure Dashboard</span>'
             f'<div class="bar-legend">'
             f'<span class="leg"><span class="pr-badge pr-green"  style="pointer-events:none">95</span> ≥90% pass</span>'
             f'<span class="leg"><span class="pr-badge pr-yellow" style="pointer-events:none">75</span> 61-89%</span>'

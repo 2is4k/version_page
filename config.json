@@ -1,5 +1,5 @@
 {
-  "_comment": "ICE Infrastructure Dashboard Configuration. Replace all CONFIGURE_ME values before enabling live data.",
+  "_comment": "Infrastructure Dashboard Configuration. Replace all CONFIGURE_ME values before enabling live data.",
   "gitlab_base_url": "https://gitlab.bare.pandrosion.org",
   "jira_base_url": "https://jira.bare.pandrosion.org/",
   "jira_jql": "project = \"{{ jira_project }}\" AND issuetype = Bug AND status NOT IN (Closed, Done, Cancelled, Resolved)",
