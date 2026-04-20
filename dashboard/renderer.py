@@ -225,6 +225,16 @@ a.pr-badge:hover { opacity: .8; transform: scale(1.1); }
 .s-progress { background: #1e3a8a; color: #93c5fd; }
 .s-review   { background: #312e81; color: #a5b4fc; }
 .bt-asgn   { color: #64748b; font-size: 10px; line-height: 1.4; }
+
+/* ── Footer ── */
+footer {
+  margin-top: 24px; padding: 14px 20px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 11px; color: #94a3b8;
+  display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+}
+footer a { color: #94a3b8; text-decoration: underline; }
+footer a:hover { color: #475569; }
 """
 
 JS = r"""
@@ -355,6 +365,7 @@ class DashboardRenderer:
         parts += self._head()
         parts += self._bar()
         parts += self._table()
+        parts.append(self._footer())
         parts.append(f"<script>{JS}</script>")
         parts.append("</body></html>")
         return "\n".join(parts)
@@ -391,6 +402,19 @@ class DashboardRenderer:
             f'<span class="bar-ts" data-ts="{ts[:10]}">Generated {ts}</span>'
             f"</div>"
         ]
+
+    def _footer(self) -> str:
+        readme_url = (
+            "https://gitlab.bare.pandrosion.org/edp/infrastructure/"
+            "platform-development/core/ice-version-tracking/-/blob/main/README.md"
+        )
+        return (
+            f'<footer>'
+            f'<span>&#169; Infra QA Team</span>'
+            f'<span>Internal &amp; experimental — not an official report</span>'
+            f'<a href="{readme_url}" target="_blank">How to read this document</a>'
+            f'</footer>'
+        )
 
     def _table(self) -> list[str]:
         envs = self.config["environments"]
@@ -506,7 +530,10 @@ class DashboardRenderer:
             cur_v = _raw_ver(self.versions.get(env["name"], {}).get(tkey, ""))
             rows.append(
                 self._version_cell(
-                    env["name"], tkey, show_testrail=False, drift=_semver_drift(cur_v, prev_v)
+                    env["name"],
+                    tkey,
+                    show_testrail=False,
+                    drift=_semver_drift(cur_v, prev_v),
                 )
             )
         rows.append("</tr>")
@@ -590,6 +617,14 @@ class DashboardRenderer:
         url = info.get("testplan_url", "")
         if str(raw) == "-":
             return '<span class="pr-badge pr-none" title="CI not configured for this environment">-</span>'
+        if int(raw) == -1:
+            if url:
+                return (
+                    f'<a href="{_esc(url)}" class="pr-badge pr-none" '
+                    f'title="Test plan found but no run matches current version/environment — click to view" '
+                    f'target="_blank">~</a>'
+                )
+            return '<span class="pr-badge pr-none" title="No matching test plan found in TestRail">?</span>'
         pct = int(raw)
         cls = "pr-green" if pct >= 90 else ("pr-yellow" if pct >= 61 else "pr-red")
         tip = f"CI passrate: {pct}%"

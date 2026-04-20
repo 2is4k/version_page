@@ -42,16 +42,28 @@ Each environment cell shows the version currently deployed in that environment. 
 
 No arrows means versions are equal or the environment is ahead.
 
+### Footer
+
+The page footer shows:
+
+- **© Infra QA Team** — authoring team
+- A reminder that the page is internal and experimental
+- **How to read this document** — link to this README
+
 ### CI passrate badge
 
-A small coloured pill in each version cell shows the percentage of CI test runs that passed for that product in that environment. Clicking it opens the corresponding GitLab pipeline.
+A small coloured pill in each version cell shows the percentage of CI test runs that passed for that product in that environment. Clicking it opens the corresponding TestRail test plan or run.
 
-| Colour | Range | Meaning |
+| Colour | Label | Meaning |
 |---|---|---|
-| Green | 90–100% | Healthy |
-| Yellow | 61–89% | Degraded |
-| Red | 0–60% | Failing |
-| Gray `-` | — | CI not configured, or no version deployed |
+| Green | 90–100 | Healthy |
+| Yellow | 61–89 | Degraded |
+| Red | 0–60 | Failing |
+| Gray `~` | — | Test plan found but no run matches the current version or environment — click to view the plan |
+| Gray `?` | — | No matching test plan found in TestRail |
+| Gray `-` | — | CI not configured for this environment, or no version deployed |
+
+The `~` badge is a link — clicking it opens the test plan so you can inspect available runs manually.
 
 If no version is deployed in an environment the badge always shows gray `-` regardless of any configured passrate value, since a passrate without a deployment is meaningless.
 
@@ -86,23 +98,24 @@ generate.py  ──►  public/index.html
 
 **Data sources:**
 
-1. **`config.json`** — environments, products, JIRA projects, CI passrate config, and embedded dummy data
+1. **`config.json`** — environments, products, JIRA projects, TestRail config, and embedded fallback data
 2. **`versions/*.json`** — one file per environment with currently deployed versions
-3. **GitLab API** *(optional, live mode)* — fetches latest pipeline URLs from scheduled pipelines
+3. **TestRail API** *(optional, live mode)* — fetches test plan and run results per product/environment
 4. **JIRA API** *(optional, live mode)* — fetches open `[QA]:` bug tickets per product
 
-### Dummy mode vs live mode
+### Example mode vs live mode
 
-Without API tokens the script automatically falls back to dummy data embedded in `config.json`. The page always builds successfully regardless.
+Without API credentials the script automatically falls back to the static `ci_config` block in `config.json` for passrates and hardcoded example tickets for JIRA. The page always builds successfully regardless.
 
 | Mode | Trigger |
 |---|---|
-| Dummy | `GITLAB_TOKEN` / `JIRA_TOKEN` / `JIRA_USER` not set, or `--dummy` flag |
-| Live | All three env vars set |
+| Example | `TESTRAIL_PASSWORD` / `JIRA_TOKEN` not set, or `--example` / `--dummy` flag |
+| Live | All credential env vars set |
 
 ```bash
-python generate.py           # auto-detect
-python generate.py --dummy   # force dummy data
+python generate.py             # auto-detect
+python generate.py --example   # force example data
+python generate.py --dummy     # alias for --example
 ```
 
 ### Configuration
@@ -129,11 +142,10 @@ All configuration lives in `config.json`. Replace every `CONFIGURE_ME` placehold
   "key": "ice_client_access",
   "name": "EDP Client Access 1.5",
   "jira_project": "EDPIPPN",
-  "ci_project_id": "123",
-  "ci_project_url": "https://gitlab.example.com/project",
-  "pipeline_env_mapping": {
-    "Schedule: InfraTestDev": "InfraTestDev"
-  },
+  "jira_jql": "project = \"{{ jira_project }}\" AND issuetype = Bug AND summary ~ \"QA\" AND status NOT IN (Closed, Done, Cancelled, Resolved)",
+  "testrail_plan": "Client Access",
+  "testrail_run_consists_of": "{{ env }}",
+  "expected_results_in": ["InfraTestDev", "InfraTestTest", "InfraTestIntegration", "VE"],
   "additional_urls": [
     { "name": "release notes", "url": "https://..." }
   ],
@@ -141,28 +153,31 @@ All configuration lives in `config.json`. Replace every `CONFIGURE_ME` placehold
     {
       "key": "create_rule_panorama",
       "name": "Create_Rule_Panorama",
-      "additional_urls": []
+      "expected_results_in": []
     }
   ]
 }
 ```
 
-`pipeline_env_mapping` maps the GitLab pipeline schedule description to an environment name. Only needed in live mode.
+- `testrail_plan` — name (or substring) of the TestRail test plan to look up. Supports `{{ version }}` template variable.
+- `testrail_run_consists_of` — comma-separated Jinja2 template of terms that must all appear in the matched run name. Variables: `{{ env }}`, `{{ version }}`, `{{ now }}`.
+- `expected_results_in` — list of environment names where TestRail results are expected. Other environments show gray `-`.
+- `jira_jql` — per-product JQL override (Jinja2 template). If omitted, the top-level `jira_jql` is used.
 
-#### CI passrate (`ci_config`)
+#### CI passrate fallback (`ci_config`)
 
-Passrate values are maintained manually in `config.json`. They represent the historical pass percentage for each product/environment combination. In live mode only the `pipeline_url` is overridden by the actual last pipeline URL from the GitLab API; the passrate itself always comes from config.
+When running in example mode, passrates are read from the `ci_config` block in `config.json`. This block is also the source for embedded demo data shown without any API credentials.
 
 ```json
 "ci_config": {
   "ice_client_access": {
-    "InfraTestDev":  { "passrate": 97, "pipeline_url": "https://..." },
+    "InfraTestDev":  { "passrate": 97, "testplan_url": "https://..." },
     "ProdBelgium":   { "passrate": "-" }
   }
 }
 ```
 
-Set `"passrate": "-"` to explicitly mark an environment as not CI-covered. Omit the environment entirely to show nothing in that cell.
+Set `"passrate": "-"` to mark an environment as not CI-covered. Omit the environment entirely to show nothing in that cell. In live mode this block is ignored; results come directly from TestRail.
 
 #### Version files
 
@@ -189,9 +204,9 @@ Set the following CI/CD variables in your GitLab project to enable live data:
 
 | Variable | Description |
 |---|---|
-| `GITLAB_TOKEN` | Personal access token with `read_api` scope |
-| `JIRA_TOKEN` | JIRA personal access token |
-| `JIRA_USER` | JIRA username / email |
+| `TESTRAIL_USER` | TestRail username / email |
+| `TESTRAIL_PASSWORD` | TestRail password or API key |
+| `JIRA_TOKEN` | JIRA personal access token (Bearer) |
 
 ### Local development
 
@@ -200,4 +215,4 @@ python generate.py --dummy
 open public/index.html
 ```
 
-No dependencies beyond Python 3.11 standard library.
+Requires `requests` and `jinja2` (`pip install -r requirements.txt`).
