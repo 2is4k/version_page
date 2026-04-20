@@ -1,5 +1,5 @@
 {
-  "update_time": "2026-04-15 01:10:00",
+  "update_time": "2026-04-20 01:12:10",
   "ice_flow": {
     "version": "2.2-1.62.0",
     "url": "https://iceflow-defsrv.iceflow.infra.test.nzero.test/docs",
@@ -61,7 +61,7 @@
   "remove_bucket_netapp": "1.4.1",
   "remove_user_netapp": "1.4.1",
   "ice_client_access": {
-    "version": "1.5-1.4.0",
+    "version": "1.5-1.4.1",
     "url": "https://client-access.ice.infra.test.nzero.test/docs"
   },
   "create_rule_panorama": "0.0.1",

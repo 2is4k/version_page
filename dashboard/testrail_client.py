@@ -1,5 +1,6 @@
 """TestRail API client — fetches test run results URLs for passrate badges."""
 
+import math
 import json
 import datetime
 import os
@@ -61,7 +62,7 @@ class TestRailClient:
                 passrate_info = self.get_passrate_info(
                     plans, product, version, testrail_run_consists_of
                 )
-                result.setdefault(key, {env: passrate_info})
+                result.setdefault(key, {})[env] = passrate_info
         return result
 
     def get_passrate_info(
@@ -69,13 +70,16 @@ class TestRailClient:
     ) -> dict:
         # https://testrail.bare.pandrosion.org/index.php?/api/v2/get_plan/32375
         # TODO improve
-        passrate_info = {"passrate": -1, "up_to_date": False}
+        if product["key"] == "ice_core":
+            pass
+        passrate_info = {"passrate": -1, "testplan_url": ""}
         for plan in plans["plans"]:
             if (
                 product.get("testrail_plan")
                 and Template(product["testrail_plan"]).render(version=version)
                 in plan["name"]
             ):
+                passrate_info["testplan_url"] = plan["url"]
                 plan_details = self._get(
                     self.config["testrail_base_url"] + f"?/api/v2/get_plan/{plan['id']}"
                 )
@@ -84,9 +88,11 @@ class TestRailClient:
                         if all(
                             elem in run["name"] for elem in testrail_run_consists_of
                         ):
-                            passrate_info["passrate"] = 100 * (run["passed_count"] / (
-                                run["passed_count"] + run["custom_status1_count"]
-                            ))
+                            passrate_info["passrate"] = math.ceil(
+                                100
+                                * run["passed_count"]
+                                / (run["passed_count"] + run["custom_status1_count"])
+                            )
                             passrate_info["testplan_url"] = run["url"]
                             return passrate_info
         return passrate_info
@@ -100,31 +106,3 @@ class TestRailClient:
         except Exception as e:
             print(f"  Error ← {url}: {e}")
         return None
-
-    def _fetch_pipeline_urls(
-        self,
-        base: str,
-        project_id: Any,
-        project_url: str,
-        env_map: dict,
-    ) -> dict:
-        if not project_id or str(project_id) == "CONFIGURE_ME":
-            return {}
-        enc = urllib.parse.quote(str(project_id), safe="")
-        data = self._get(f"{base}/api/v4/projects/{enc}/pipeline_schedules")
-        if not data:
-            return {}
-        out: dict = {}
-        for sched in data:
-            env_name = env_map.get(sched.get("description", ""))
-            if not env_name:
-                continue
-            lp = sched.get("last_pipeline") or {}
-            out[env_name] = lp.get("web_url", project_url + "/-/pipelines")
-        return out
-
-    @staticmethod
-    def _merge_urls(result: dict, key: str, urls: dict) -> None:
-        for env_name, url in urls.items():
-            if key in result and env_name in result[key]:
-                result[key][env_name]["pipeline_url"] = url

@@ -1,7 +1,7 @@
 {
-  "update_time": "2026-04-19 01:09:55",
+  "update_time": "2026-04-20 01:12:06",
   "ice_flow": {
-    "version": "2.2-1.63.0",
+    "version": "2.2-1.63.2",
     "url": "https://iceflow-defsrv.iceflow.infra.dev.nzero.test/docs",
     "additional_urls": [
       {
@@ -29,7 +29,7 @@
     "url": "https://edp-ipam.ice.infra.dev.nzero.test/docs"
   },
   "ice_core": {
-    "version": "1.7.6",
+    "version": "1.7.7",
     "url": "https://api.ice.infra.dev.nzero.test/docs",
     "additional_urls": [
       {
@@ -47,10 +47,10 @@
   "create_l3_zone_cisco": "0.0.30",
   "create_compute_cluster_apstra": "0.0.24",
   "create_compute_cluster_cisco": "0.0.32",
-  "create_virtual_machine": "0.1.18",
+  "create_virtual_machine": "0.4.0",
   "create_dns_record": "0.5.16",
   "update_dns_record": "0.5.16",
-  "delete_resource": "0.3.12",
+  "delete_resource": "0.5.0",
   "object_storage": {
     "version": "2.3-1.48.9",
     "url": "https://oss.ice.infra.dev.nzero.test/docs"
@@ -61,7 +61,7 @@
   "remove_bucket_netapp": "1.4.1",
   "remove_user_netapp": "1.4.1",
   "ice_client_access": {
-    "version": "1.5-1.4.0",
+    "version": "1.5-1.4.1",
     "url": "https://client-access.ice.infra.dev.nzero.test/docs"
   },
   "create_rule_panorama": "0.0.1",
@@ -73,11 +73,11 @@
   "ipa_issue_user_cert": "0.0.1",
   "ipa_revoke_user_cert": "0.0.1",
   "workspace_base_service": {
-    "version": "0.0.142",
+    "version": "0.0.155",
     "url": "https://workspace-base.ice.infra.dev.nzero.test/docs"
   },
   "workspace_ice_fow": {
-    "version": "2.2-1.63.0",
+    "version": "2.2-1.63.2",
     "url": "https://if-workspaces-defsrv.ice.infra.dev.nzero.test/docs",
     "additional_urls": [
       {

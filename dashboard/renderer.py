@@ -409,11 +409,11 @@ class DashboardRenderer:
             "platform-development/core/ice-version-tracking/-/blob/main/README.md"
         )
         return (
-            f'<footer>'
-            f'<span>&#169; Infra QA Team</span>'
-            f'<span>Internal &amp; experimental — not an official report</span>'
+            f"<footer>"
+            f"<span>&#169; Infra QA Team</span>"
+            f"<span>Internal &amp; experimental — not an official report</span>"
             f'<a href="{readme_url}" target="_blank">How to read this document</a>'
-            f'</footer>'
+            f"</footer>"
         )
 
     def _table(self) -> list[str]:

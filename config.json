@@ -91,8 +91,9 @@
       "name": "ICE Core",
       "jira_project": "EDPIPIF",
       "jira_jql": "project = \"{{ jira_project }}\" AND issuetype = Bug AND summary ~ \"QA\" AND status NOT IN (Closed, Done, Cancelled, Resolved)",
-      "testrail_plan_contains": "ICE API {{ version }}",
-      "testrail_run_consists_of": "{{ env }}, {{ version }}, {{ now.strftime('%Y-%m-%d') }}",
+      "testrail_plan": "ICE API {{ version }}",
+      "testrail_run_consists_of": "{{ env }}, {{ version }}",
+      "testrail_run_consists_of_next": "{{ env }}, {{ version }}, {{ now.strftime('%Y-%m-%d') }}",
       "expected_results_in": ["InfraTestDev", "InfraTestTest", "InfraTestIntegration", "VE"],
       "additional_urls": [
         { "name": "release notes", "url": "https://gitlab.bare.pandrosion.org/edp/infrastructure/platform-development/core/ice-core-stack/-/blob/main/CHANGELOG.md" },
