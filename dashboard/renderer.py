@@ -26,6 +26,7 @@ CSS = """
   --text: #0f172a;
   --muted: #64748b;
   --bar-h: 52px;
+  --footer-h: 32px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font); font-size: 13px; background: var(--bg); color: var(--text); }
@@ -54,7 +55,7 @@ body { font-family: var(--font); font-size: 13px; background: var(--bg); color: 
 .wrap {
   overflow-x: auto;
   overflow-y: auto;
-  height: calc(100vh - var(--bar-h));
+  height: calc(100vh - var(--bar-h) - var(--footer-h));
 }
 table { border-collapse: collapse; width: max-content; min-width: 100%; background: var(--surface); }
 
@@ -228,10 +229,12 @@ a.pr-badge:hover { opacity: .8; transform: scale(1.1); }
 
 /* ── Footer ── */
 footer {
-  margin-top: 24px; padding: 14px 20px;
-  border-top: 1px solid #e2e8f0;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 6px 20px;
+  background: #f8fafc; border-top: 1px solid #e2e8f0;
   font-size: 11px; color: #94a3b8;
   display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+  z-index: 100;
 }
 footer a { color: #94a3b8; text-decoration: underline; }
 footer a:hover { color: #475569; }
@@ -412,6 +415,7 @@ class DashboardRenderer:
             f"<footer>"
             f"<span>&#169; Infra QA Team</span>"
             f"<span>Internal &amp; experimental — not an official report</span>"
+            f"<span>Self-contained page — can be distributed or embedded as-is</span>"
             f'<a href="{readme_url}" target="_blank">How to read this document</a>'
             f"</footer>"
         )

@@ -48,6 +48,7 @@ The page footer shows:
 
 - **© Infra QA Team** — authoring team
 - A reminder that the page is internal and experimental
+- A note that the page is self-contained and can be distributed or embedded as-is
 - **How to read this document** — link to this README
 
 ### CI passrate badge
