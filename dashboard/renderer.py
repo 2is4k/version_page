@@ -261,15 +261,29 @@ JS = r"""
     freezeStickyCol();
   }
 
-  /* ── Mark stale timestamps (date != today) ── */
+  /* ── Mark stale timestamps ── */
   function checkStale() {
-    var today = new Date();
-    var yy    = today.getFullYear();
-    var mm    = String(today.getMonth() + 1).padStart(2, '0');
-    var dd    = String(today.getDate()).padStart(2, '0');
+    var now = new Date();
+
+    /* Generated bar: stale if date differs from today */
+    var yy = now.getFullYear();
+    var mm = String(now.getMonth() + 1).padStart(2, '0');
+    var dd = String(now.getDate()).padStart(2, '0');
     var todayIso = yy + '-' + mm + '-' + dd;
     document.querySelectorAll('[data-ts]').forEach(function (el) {
       if (el.dataset.ts && el.dataset.ts !== todayIso) {
+        el.classList.add('stale');
+      }
+    });
+
+    /* Last Update cells: stale if older than 24 hours */
+    var cutoff = now.getTime() - 24 * 60 * 60 * 1000;
+    document.querySelectorAll('[data-ts-full]').forEach(function (el) {
+      var raw = el.dataset.tsFull;
+      if (!raw) return;
+      /* Normalise "2026-04-19 08:00 UTC" → parseable by Date() */
+      var parsed = new Date(raw.replace(' UTC', 'Z').replace(' ', 'T'));
+      if (!isNaN(parsed.getTime()) && parsed.getTime() < cutoff) {
         el.classList.add('stale');
       }
     });
@@ -454,8 +468,7 @@ class DashboardRenderer:
         p.append('<tr class="ur"><td class="ur-label">Last Update</td>')
         for env in envs:
             val = self.versions.get(env["name"], {}).get("update_time", "")
-            date = val[:10] if val else ""
-            attr = f' data-ts="{_esc(date)}"' if date else ""
+            attr = f' data-ts-full="{_esc(val)}"' if val else ""
             p.append(f'<td class="vc"{attr}>{_esc(val)}</td>')
         p.append("</tr>")
 

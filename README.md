@@ -26,7 +26,9 @@ Each product occupies one row. Workflow templates belonging to a product appear 
 - **Generated** (top-right of the bar) — when the page was last built.
 - **Last Update** (first data row) — when each environment's version file was last written.
 
-If either timestamp is from a previous day it turns **orange** as a staleness warning. Fresh data is shown without highlighting.
+Staleness is highlighted in **orange**:
+- **Generated** turns orange if the build date is not today.
+- **Last Update** turns orange if the timestamp is older than 24 hours.
 
 ### Version cells
 
